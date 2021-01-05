@@ -86,7 +86,7 @@ var deleteCmd = &cobra.Command{
 
 func addCommandUpdateCmd() error {
 	vaultCmd.AddCommand(updateCmd)
-	updateCmd.Flags().StringP("key", "p", "", "API key value")
+	updateCmd.Flags().StringP("key", "k", "", "API key value")
 
 	return updateCmd.MarkFlagRequired("key")
 
@@ -94,7 +94,7 @@ func addCommandUpdateCmd() error {
 
 func addCommandNewCmd() error {
 	vaultCmd.AddCommand(newCmd)
-	newCmd.Flags().StringP("key", "p", "", "API key value")
+	newCmd.Flags().StringP("key", "k", "", "API key value")
 	newCmd.Flags().String("url", "", "API URI")
 
 	err := newCmd.MarkFlagRequired("key")

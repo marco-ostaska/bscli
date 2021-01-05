@@ -10,8 +10,8 @@ func TestNewVault(t *testing.T) {
 		args     []string
 		expected string
 	}{
-		{"Missing args 1", []string{"vault", "new"}, `required flag(s) "key", "url", not set`},
-		{"Missing args 2", []string{"vault", "new", "-k", "!@#$%^&*key"}, `required flag(s) url" not set`},
+		{"Missing args 1", []string{"vault", "new"}, `required flag(s) "key", "url" not set`},
+		{"Missing args 2", []string{"vault", "new", "-k", "!@#$%^&*key"}, `required flag(s) "url" not set`},
 		{"Ok", []string{"vault", "new", "-k", "!@#$%^&*key", "--url", "https://xyz.io"}, ""},
 	}
 
@@ -25,7 +25,7 @@ func TestNewVault(t *testing.T) {
 					t.Skip(err)
 					return
 				}
-				t.Errorf(err.Error())
+				t.Errorf("got: %s, expected: %s", err.Error(), tc.expected)
 			}
 		})
 	}
@@ -56,7 +56,7 @@ func TestUpdateVault(t *testing.T) {
 		args     []string
 		expected string
 	}{
-		{"Missing args 1", []string{"vault", "update"}, `required flag(s) "key"`},
+		{"Missing args 1", []string{"vault", "update"}, `required flag(s) "key" not set`},
 		{"OK", []string{"vault", "update", "-k", "mykey"}, `required flag(s) "url" not set`},
 	}
 
@@ -70,13 +70,13 @@ func TestUpdateVault(t *testing.T) {
 					t.Skip(err)
 					return
 				}
-				t.Errorf(err.Error())
+				t.Errorf("got: %s, expected: %s", err.Error(), tc.expected)
 			}
 		})
 	}
 
 	t.Run("Check credentials", func(t *testing.T) {
-		keyValue := "em7admin"
+		keyValue := "mykey"
 		uri := "https://xyz.io"
 		if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
 			t.Errorf(err.Error())
