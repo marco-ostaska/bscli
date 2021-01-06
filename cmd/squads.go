@@ -44,7 +44,7 @@ var gQL struct {
 
 func squads(cmd *cobra.Command, args []string) error {
 	if err := readVault(); err != nil {
-		return nil
+		return err
 	}
 	query := `{
 		squads {

@@ -37,6 +37,9 @@ const (
 
 func readVault() error {
 	if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
+		if strings.Contains(err.Error(), "no such file or directory") {
+			return fmt.Errorf("No vault created for user, please run (bscli vault new) to create one first")
+		}
 		return err
 	}
 

@@ -27,7 +27,7 @@ import (
 	"github.com/spf13/cobra/doc"
 )
 
-var version string = "unreleased"
+var version string
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
@@ -59,6 +59,7 @@ This program is distributed in the hope that it will be useful,
 but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
-Witten By Marco Ostaska
+
+Written By Marco Ostaska
 `)
 }
