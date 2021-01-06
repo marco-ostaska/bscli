@@ -24,6 +24,7 @@ import (
 	"strings"
 
 	"github.com/marco-ostaska/boringstuff"
+	"github.com/marco-ostaska/httpcalls"
 	"github.com/marco-ostaska/uvault"
 	"github.com/spf13/cobra"
 )
@@ -34,7 +35,19 @@ const (
 	apiKey    = "Bluesight-API-Token"
 )
 
+func readVault() {
+	if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
+		log.Fatalln(err)
+	}
+
+	httpc.URL = vCredential.URL
+	httpc.AuthValue = vCredential.DecryptedKValue
+	httpc.AuthKey = vCredential.APIKey
+
+}
+
 var vCredential uvault.Credential
+var httpc httpcalls.APIData
 
 // vaultCmd represents the vault command
 var vaultCmd = &cobra.Command{
@@ -56,9 +69,9 @@ var newCmd = &cobra.Command{
 	SilenceErrors: true,
 	Example: `
   Unix Based OS: (use single quotes)
-      sl1cmd vault new -k 'pass1234' --url 'https://bluesight.com'
+      sl1cmd vault new -k '<token>' --url 'https://bluesight.com'
   Windows: (use double quotes)
-      sl1cmd vault new -k "pass1234" --url "https://bluesight.com"
+      sl1cmd vault new -k "<token>" --url "https://bluesight.com"
 `,
 	RunE: newVault,
 }
