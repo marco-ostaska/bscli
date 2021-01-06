@@ -35,14 +35,15 @@ const (
 	apiKey    = "Bluesight-API-Token"
 )
 
-func readVault() {
+func readVault() error {
 	if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
-		log.Fatalln(err)
+		return err
 	}
 
 	httpc.URL = vCredential.URL
 	httpc.AuthValue = vCredential.DecryptedKValue
 	httpc.AuthKey = vCredential.APIKey
+	return nil
 
 }
 

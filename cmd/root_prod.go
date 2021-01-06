@@ -1,4 +1,4 @@
-// +build !prod
+// +build prod
 
 /*
 Copyright © 2021 Marco Ostaska
@@ -24,14 +24,13 @@ import (
 	"os"
 
 	"github.com/spf13/cobra"
-	"github.com/spf13/cobra/doc"
 )
 
 var version string = "unreleased"
 
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
-	Use:     "bscli",
+	Use:     "bsio",
 	Short:   "A command line tool for bluesight.io",
 	Version: version,
 }
@@ -43,7 +42,6 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	doc.GenMarkdownTree(rootCmd, "./docs")
 }
 
 func init() {
@@ -52,7 +50,7 @@ func init() {
 
 	rootCmd.SetVersionTemplate(`{{.Name}} {{.Version}}
 
-Copyright (C) 2021 bscli is released under GNU General Public License v3 
+Copyright (C) 2021 bsio is released under GNU General Public License v3 
 (GPLv3) <http://www.gnu.org/licenses/>
 
 This program is distributed in the hope that it will be useful,

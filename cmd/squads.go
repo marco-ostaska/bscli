@@ -43,6 +43,9 @@ var gQL struct {
 }
 
 func squads(cmd *cobra.Command, args []string) error {
+	if err := readVault(); err != nil {
+		return nil
+	}
 	query := `{
 		squads {
 		  id
@@ -67,6 +70,5 @@ func squads(cmd *cobra.Command, args []string) error {
 
 func init() {
 	rootCmd.AddCommand(squadsCmd)
-	readVault()
 
 }
