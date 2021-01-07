@@ -35,18 +35,21 @@ const (
 	apiKey    = "Bluesight-API-Token"
 )
 
-func readVault() error {
+// readVault reads vault contents
+func readVault() {
 	if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
 		if strings.Contains(err.Error(), "no such file or directory") {
-			return fmt.Errorf("No vault created for user, please run (bscli vault new) to create one first")
+			fmt.Println(newCmd.Long)
+			newCmd.Usage()
+			fmt.Printf("\n⛔️ ")
+			log.Fatalln("No vault created for user, please try to create it using the instruction above first 👀")
 		}
-		return err
+		log.Fatalln(err)
 	}
 
 	httpc.URL = vCredential.URL
 	httpc.AuthValue = vCredential.DecryptedKValue
 	httpc.AuthKey = vCredential.APIKey
-	return nil
 
 }
 

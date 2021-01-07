@@ -33,19 +33,18 @@ var squadsCmd = &cobra.Command{
 	RunE:          squads,
 }
 
-var gQL struct {
-	Data struct {
-		Squads []struct {
-			ID   string `json:"id"`
-			Name string `json:"name"`
-		} `json:"squads"`
-	} `json:"data"`
-}
-
 func squads(cmd *cobra.Command, args []string) error {
-	if err := readVault(); err != nil {
-		return err
+	readVault()
+
+	var gQL struct {
+		Data struct {
+			Squads []struct {
+				ID   string `json:"id"`
+				Name string `json:"name"`
+			} `json:"squads"`
+		} `json:"data"`
 	}
+
 	query := `{
 		squads {
 		  id
