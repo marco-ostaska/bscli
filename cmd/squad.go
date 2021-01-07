@@ -143,6 +143,7 @@ func displayUsers(cmd *cobra.Command, id string) error {
 	return nil
 }
 
+// TODO: need a better way of doing this, too much imilar code
 func displayDescription(cmd *cobra.Command, id string) error {
 	d, err := cmd.Flags().GetBool("description")
 	if err != nil {
