@@ -23,6 +23,17 @@ import (
 	"github.com/spf13/cobra"
 )
 
+var flags = []struct {
+	Name  string
+	Short string
+	Call  func(string) error
+}{
+	{"name", "n", displayName},
+	{"users", "u", displayUsers},
+	{"swimlaneWorkstates", "s", displayswimlaneWorkstates},
+	{"description", "d", displayDescription},
+}
+
 // graphQL most primitive data for squad resturns
 type graphQL struct {
 	Data data `json:"data"`
@@ -34,7 +45,7 @@ type users struct {
 	Email    string `json:"email"`
 }
 
-// squad's Assignees information
+// squad's Assignees information for cards
 type assignees struct {
 	Email    string `json:"email"`
 	Fullname string `json:"fullname"`
@@ -87,53 +98,19 @@ var squadCmd = &cobra.Command{
 }
 
 func initSquad(cmd *cobra.Command, args []string) error {
-	if cmd.Flags().NFlag() < 1 {
-		return fmt.Errorf("no flag(s) provided")
+
+	if cmd.Flags().NFlag() != 1 {
+		return fmt.Errorf("accepts 1 flag, received %v", cmd.Flags().NFlag())
 	}
 	readVault()
 
-	errs := make(chan error)
-
-	go func() {
-
-		if cmd.Flag("name").Changed {
-			errs <- displayName(args[0])
-			return
-		}
-		errs <- nil
-
-	}()
-
-	go func() {
-
-		if cmd.Flag("description").Changed {
-			errs <- displayDescription(args[0])
-			return
-		}
-		errs <- nil
-	}()
-
-	go func() {
-
-		if cmd.Flag("users").Changed {
-			errs <- displayUsers(args[0])
-			return
-		}
-		errs <- nil
-	}()
-
-	for i := 0; i < 3; i++ {
-		if <-errs != nil {
-			return <-errs
+	for _, f := range flags {
+		if cmd.Flag(f.Name).Changed {
+			f.Call(args[0])
 		}
 	}
-
 	return nil
 
-}
-
-func (qQL *graphQL) parser() {
-	return
 }
 
 func displayUsers(id string) error {
@@ -141,19 +118,16 @@ func displayUsers(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s) {
 		  users{
-			fullname
 			email
+			fullname
 		  }
-		  squadUsersCount
 		}
 	  }`, id)
 
-	h := httpc
-	if err := h.QueryGraphQL(query, &gQL); err != nil {
+	if err := httpc.QueryGraphQL(query, &gQL); err != nil {
 		return err
 	}
 
-	fmt.Println("Users:")
 	for _, u := range gQL.Data.Squad.Users {
 		fmt.Printf("- %s (%s)\n", u.Fullname, u.Email)
 	}
@@ -162,7 +136,29 @@ func displayUsers(id string) error {
 	return nil
 }
 
-// TODO: need a better way of doing this, too much imilar code
+func displayswimlaneWorkstates(id string) error {
+	var gQL graphQL
+	query := fmt.Sprintf(`{
+		squad(id: %s) {
+		  swimlaneWorkstates{
+			activeWorkstates
+			name
+		  }
+		}
+	  }`, id)
+
+	if err := httpc.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
+
+	for _, u := range gQL.Data.Squad.SwimlaneWorkstates {
+		fmt.Printf("- %s\n", u.Name)
+	}
+
+	return nil
+}
+
+// TODO: need a better way of doing this
 func displayDescription(id string) error {
 	var g graphQL
 
@@ -173,13 +169,11 @@ func displayDescription(id string) error {
 	  }
 	  `, id)
 
-	h := httpc
-
-	if err := h.QueryGraphQL(query, &g); err != nil {
+	if err := httpc.QueryGraphQL(query, &g); err != nil {
 		return err
 	}
 
-	fmt.Println("Description:", g.Data.Squad.Description)
+	fmt.Println(g.Data.Squad.Description)
 
 	return nil
 }
@@ -194,20 +188,21 @@ func displayName(id string) error {
 	  }
 	  `, id)
 
-	h := httpc
-	if err := h.QueryGraphQL(query, &gQL); err != nil {
+	if err := httpc.QueryGraphQL(query, &gQL); err != nil {
 		return err
 	}
 
-	fmt.Println("Name:", gQL.Data.Squad.Name)
+	fmt.Println(gQL.Data.Squad.Name)
 
 	return nil
 }
 
 func init() {
 	rootCmd.AddCommand(squadCmd)
-	squadCmd.Flags().BoolP("name", "n", false, "display name for given squad")
-	squadCmd.Flags().BoolP("users", "u", false, "display users for given squad")
-	squadCmd.Flags().BoolP("description", "d", false, "display description for given squad")
+
+	for _, f := range flags {
+		desc := fmt.Sprintf("display %s for given squad", f.Name)
+		squadCmd.Flags().BoolP(f.Name, f.Short, false, desc)
+	}
 
 }
