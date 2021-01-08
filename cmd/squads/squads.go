@@ -31,10 +31,10 @@ var Cmd = &cobra.Command{
 	Long:          `list the squads for the user`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	RunE:          squads,
+	RunE:          squadsMain,
 }
 
-func squads(cmd *cobra.Command, args []string) error {
+func squadsMain(cmd *cobra.Command, args []string) error {
 	vault.ReadVault()
 
 	var gQL struct {

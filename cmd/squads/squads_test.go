@@ -6,7 +6,7 @@ import (
 	"github.com/marco-ostaska/bscli/cmd"
 )
 
-func TestSquads(t *testing.T) {
+func TestSquadsMain(t *testing.T) {
 
 	cmd.RootCmd.SetArgs([]string{"squads"})
 	cmd.RootCmd.SilenceErrors = true
