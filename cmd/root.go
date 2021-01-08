@@ -23,6 +23,8 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/marco-ostaska/bscli/cmd/squad"
+	"github.com/marco-ostaska/bscli/cmd/squads"
 	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 )
@@ -47,7 +49,10 @@ func Execute() {
 }
 
 func init() {
+
 	RootCmd.AddCommand(vault.Cmd)
+	RootCmd.AddCommand(squads.Cmd)
+	RootCmd.AddCommand(squad.Cmd)
 
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "display this help and exit")
 	RootCmd.Flags().BoolP("version", "v", false, "output version information and exit")
