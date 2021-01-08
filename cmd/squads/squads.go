@@ -15,16 +15,17 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package cmd
+package squads
 
 import (
 	"fmt"
 
+	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 )
 
-// squadsCmd represents the squads command
-var squadsCmd = &cobra.Command{
+// Cmd represents the squads command
+var Cmd = &cobra.Command{
 	Use:           "squads",
 	Short:         "list the squads for the user",
 	Long:          `list the squads for the user`,
@@ -34,7 +35,7 @@ var squadsCmd = &cobra.Command{
 }
 
 func squads(cmd *cobra.Command, args []string) error {
-	readVault()
+	vault.ReadVault()
 
 	var gQL struct {
 		Data struct {
@@ -54,7 +55,7 @@ func squads(cmd *cobra.Command, args []string) error {
 	  }
 	  `
 
-	if err := httpc.QueryGraphQL(query, &gQL); err != nil {
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
 		return err
 	}
 
@@ -65,9 +66,4 @@ func squads(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func init() {
-	rootCmd.AddCommand(squadsCmd)
-
 }
