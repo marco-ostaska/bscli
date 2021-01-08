@@ -15,7 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-package cmd
+package vault
 
 import (
 	"fmt"
@@ -29,15 +29,16 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// vault basic filesD
 const (
-	vaultDir  = "bscli"
-	vaultFile = "bscli.vlt"
-	apiKey    = "Bluesight-API-Token"
+	Dir    = "bscli"
+	File   = "bscli.vlt"
+	APIKey = "Bluesight-API-Token"
 )
 
-// readVault reads vault contents
-func readVault() {
-	if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
+// ReadVault reads vault contents
+func ReadVault() {
+	if err := Credential.ReadFile(Dir, File); err != nil {
 		if strings.Contains(err.Error(), "no such file or directory") {
 			fmt.Println(newCmd.Long)
 			newCmd.Usage()
@@ -47,17 +48,18 @@ func readVault() {
 		log.Fatalln(err)
 	}
 
-	httpc.URL = vCredential.URL
-	httpc.AuthValue = vCredential.DecryptedKValue
-	httpc.AuthKey = vCredential.APIKey
+	httpc.URL = Credential.URL
+	httpc.AuthValue = Credential.DecryptedKValue
+	httpc.AuthKey = Credential.APIKey
 
 }
 
-var vCredential uvault.Credential
+// Credential is a reference to uvault.Credential
+var Credential uvault.Credential
 var httpc httpcalls.APIData
 
-// vaultCmd represents the vault command
-var vaultCmd = &cobra.Command{
+// Cmd represents the vault command
+var Cmd = &cobra.Command{
 	Use:   "vault",
 	Short: "create or update vault credentials",
 	Long:  `create or update vault credentials.`,
@@ -105,7 +107,7 @@ var deleteCmd = &cobra.Command{
 }
 
 func addCommandUpdateCmd() error {
-	vaultCmd.AddCommand(updateCmd)
+	Cmd.AddCommand(updateCmd)
 	updateCmd.Flags().StringP("key", "k", "", "API key value")
 
 	return updateCmd.MarkFlagRequired("key")
@@ -113,7 +115,7 @@ func addCommandUpdateCmd() error {
 }
 
 func addCommandNewCmd() error {
-	vaultCmd.AddCommand(newCmd)
+	Cmd.AddCommand(newCmd)
 	newCmd.Flags().StringP("key", "k", "", "API key value")
 	newCmd.Flags().String("url", "", "API URI")
 
@@ -135,7 +137,7 @@ func newVault(cmd *cobra.Command, args []string) error {
 		return re
 	}
 
-	if err = vCredential.SetInfo(apiKey, keyValue, uri, vaultDir, vaultFile); err != nil {
+	if err = Credential.SetInfo(APIKey, keyValue, uri, Dir, File); err != nil {
 		return err
 	}
 
@@ -144,7 +146,7 @@ func newVault(cmd *cobra.Command, args []string) error {
 }
 
 func updateVault(cmd *cobra.Command, args []string) error {
-	err := vCredential.ReadFile(vaultDir, vaultFile)
+	err := Credential.ReadFile(Dir, File)
 	if err != nil {
 		if strings.Contains(err.Error(), "no such file or directory") {
 			return fmt.Errorf("No credentials found, please try create a new credential vault first ❌")
@@ -156,9 +158,9 @@ func updateVault(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println("Updating credentials", vCredential.URL)
+	fmt.Println("Updating credentials", Credential.URL)
 
-	if err = vCredential.SetInfo(apiKey, keyValue, vCredential.URL, vaultDir, vaultFile); err != nil {
+	if err = Credential.SetInfo(APIKey, keyValue, Credential.URL, Dir, File); err != nil {
 		return err
 	}
 	fmt.Println("Vault configured ✔")
@@ -167,11 +169,11 @@ func updateVault(cmd *cobra.Command, args []string) error {
 }
 
 func deleteVault(cmd *cobra.Command, args []string) error {
-	if err := vCredential.UserInfo(vaultDir, vaultFile); err != nil {
+	if err := Credential.UserInfo(Dir, File); err != nil {
 		return fmt.Errorf("%s ❌", err)
 	}
 
-	if err := os.Remove(vCredential.File); err != nil {
+	if err := os.Remove(Credential.File); err != nil {
 		return fmt.Errorf("%s ❌", err.Error())
 	}
 
@@ -181,8 +183,7 @@ func deleteVault(cmd *cobra.Command, args []string) error {
 }
 
 func init() {
-	rootCmd.AddCommand(vaultCmd)
-	vaultCmd.AddCommand(deleteCmd)
+	Cmd.AddCommand(deleteCmd)
 
 	err := addCommandNewCmd()
 	err1 := addCommandUpdateCmd()

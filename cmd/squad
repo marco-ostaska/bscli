@@ -199,6 +199,7 @@ func displayName(id string) error {
 
 func init() {
 	rootCmd.AddCommand(squadCmd)
+	//rootCmd.AddCommand(vaultCmd)
 
 	for _, f := range flags {
 		desc := fmt.Sprintf("display %s for given squad", f.Name)

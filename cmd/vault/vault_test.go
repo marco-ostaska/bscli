@@ -1,7 +1,10 @@
-package cmd
+package vault_test
 
 import (
 	"testing"
+
+	"github.com/marco-ostaska/bscli/cmd"
+	"github.com/marco-ostaska/bscli/cmd/vault"
 )
 
 func TestNewVault(t *testing.T) {
@@ -17,10 +20,11 @@ func TestNewVault(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			rootCmd.SetArgs(tc.args)
-			rootCmd.SilenceErrors = true
-			rootCmd.SilenceUsage = true
-			if err := rootCmd.Execute(); err != nil {
+
+			cmd.RootCmd.SetArgs(tc.args)
+			cmd.RootCmd.SilenceErrors = true
+			cmd.RootCmd.SilenceUsage = true
+			if err := cmd.RootCmd.Execute(); err != nil {
 				if err.Error() == tc.expected {
 					t.Skip(err)
 					return
@@ -33,17 +37,17 @@ func TestNewVault(t *testing.T) {
 	t.Run("Check credentials", func(t *testing.T) {
 		keyValue := "!@#$%^&*key"
 		uri := "https://xyz.io"
-		if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
+		if err := vault.Credential.ReadFile(vault.Dir, vault.File); err != nil {
 			t.Errorf(err.Error())
 		}
 
 		switch {
-		case vCredential.APIKey != apiKey:
-			t.Errorf("got %v, expected %v", vCredential.APIKey, apiKey)
-		case vCredential.DecryptedKValue != keyValue:
-			t.Errorf("got %v, expected %v", vCredential.DecryptedKValue, keyValue)
-		case vCredential.URL != uri:
-			t.Errorf("got %v, expected %v", vCredential.URL, uri)
+		case vault.Credential.APIKey != vault.APIKey:
+			t.Errorf("got %v, expected %v", vault.Credential.APIKey, vault.APIKey)
+		case vault.Credential.DecryptedKValue != keyValue:
+			t.Errorf("got %v, expected %v", vault.Credential.DecryptedKValue, keyValue)
+		case vault.Credential.URL != uri:
+			t.Errorf("got %v, expected %v", vault.Credential.URL, uri)
 		}
 
 	})
@@ -62,10 +66,10 @@ func TestUpdateVault(t *testing.T) {
 
 	for _, tc := range tt {
 		t.Run(tc.name, func(t *testing.T) {
-			rootCmd.SetArgs(tc.args)
-			rootCmd.SilenceErrors = true
-			rootCmd.SilenceUsage = true
-			if err := rootCmd.Execute(); err != nil {
+			cmd.RootCmd.SetArgs(tc.args)
+			cmd.RootCmd.SilenceErrors = true
+			cmd.RootCmd.SilenceUsage = true
+			if err := cmd.RootCmd.Execute(); err != nil {
 				if err.Error() == tc.expected {
 					t.Skip(err)
 					return
@@ -78,17 +82,17 @@ func TestUpdateVault(t *testing.T) {
 	t.Run("Check credentials", func(t *testing.T) {
 		keyValue := "mykey"
 		uri := "https://xyz.io"
-		if err := vCredential.ReadFile(vaultDir, vaultFile); err != nil {
+		if err := vault.Credential.ReadFile(vault.Dir, vault.File); err != nil {
 			t.Errorf(err.Error())
 		}
 
 		switch {
-		case vCredential.APIKey != apiKey:
-			t.Errorf("got %v, expected %v", vCredential.APIKey, apiKey)
-		case vCredential.DecryptedKValue != keyValue:
-			t.Errorf("got %v, expected %v", vCredential.DecryptedKValue, keyValue)
-		case vCredential.URL != uri:
-			t.Errorf("got %v, expected %v", vCredential.URL, uri)
+		case vault.Credential.APIKey != vault.APIKey:
+			t.Errorf("got %v, expected %v", vault.Credential.APIKey, vault.APIKey)
+		case vault.Credential.DecryptedKValue != keyValue:
+			t.Errorf("got %v, expected %v", vault.Credential.DecryptedKValue, keyValue)
+		case vault.Credential.URL != uri:
+			t.Errorf("got %v, expected %v", vault.Credential.URL, uri)
 		}
 
 	})
@@ -96,8 +100,8 @@ func TestUpdateVault(t *testing.T) {
 
 func TestDeleteVault(t *testing.T) {
 
-	rootCmd.SetArgs([]string{"vault", "delete"})
-	if err := rootCmd.Execute(); err != nil {
+	cmd.RootCmd.SetArgs([]string{"vault", "delete"})
+	if err := cmd.RootCmd.Execute(); err != nil {
 		t.Errorf(err.Error())
 	}
 

@@ -23,34 +23,37 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 	"github.com/spf13/cobra/doc"
 )
 
 var version string
 
-// rootCmd represents the base command when called without any subcommands
-var rootCmd = &cobra.Command{
+// RootCmd represents the base command when called without any subcommands
+var RootCmd = &cobra.Command{
 	Use:     "bscli",
 	Short:   "A command line tool for bluesight.io",
 	Version: version,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
-// This is called by main.main(). It only needs to happen once to the rootCmd.
+// This is called by main.main(). It only needs to happen once to the RootCmd.
 func Execute() {
-	if err := rootCmd.Execute(); err != nil {
+	if err := RootCmd.Execute(); err != nil {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	doc.GenMarkdownTree(rootCmd, "./docs")
+	doc.GenMarkdownTree(RootCmd, "./docs")
 }
 
 func init() {
-	rootCmd.PersistentFlags().BoolP("help", "h", false, "display this help and exit")
-	rootCmd.Flags().BoolP("version", "v", false, "output version information and exit")
+	RootCmd.AddCommand(vault.Cmd)
 
-	rootCmd.SetVersionTemplate(`{{.Name}} {{.Version}}
+	RootCmd.PersistentFlags().BoolP("help", "h", false, "display this help and exit")
+	RootCmd.Flags().BoolP("version", "v", false, "output version information and exit")
+
+	RootCmd.SetVersionTemplate(`{{.Name}} {{.Version}}
 
 Copyright (C) 2021 bscli is released under GNU General Public License v3 
 (GPLv3) <http://www.gnu.org/licenses/>
