@@ -43,9 +43,9 @@ func addCommandNewCmd() error {
 	newCmd.Flags().StringP("key", "k", "", "API key value")
 	newCmd.Flags().String("url", "", "API URI")
 
-	errs := []error {
-		ewCmd.MarkFlagRequired("key")
-		newCmd.MarkFlagRequired("url")
+	errs := []error{
+		newCmd.MarkFlagRequired("key"),
+		newCmd.MarkFlagRequired("url"),
 	}
 
 	for _, err := range errs {
@@ -53,7 +53,6 @@ func addCommandNewCmd() error {
 			return err
 		}
 	}
-
 
 	return nil
 }

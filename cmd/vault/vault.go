@@ -15,15 +15,14 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package vault is mainly a reference do command vault
+// Package vault is mainly a reference to cobra command vault
 //
-// It also have essentials to vault admnistration to be used throughout the application.
+// But it has the essentials to vault adminstration to be used throughout the application.
 package vault
 
 import (
 	"fmt"
 	"log"
-	"os"
 	"strings"
 
 	"github.com/marco-ostaska/httpcalls"
@@ -73,72 +72,6 @@ var Cmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 	},
-}
-
-var updateCmd = &cobra.Command{
-	Use:   "update",
-	Short: "update an existing vault.",
-	Long:  `update an existing vault.`,
-	Example: `  
-  Unix based OS:  (use single quotes)
-      sl1cmd update -k 'pass1234'
-  Windows: (use double quotes)
-      sl1cmd update -k "pass1234"`,
-	RunE: updateVault,
-}
-
-var deleteCmd = &cobra.Command{
-	Use:           "delete",
-	Short:         "delete an existing vault.",
-	Long:          `delete an existing vault.`,
-	SilenceUsage:  true,
-	SilenceErrors: true,
-	RunE:          deleteVault,
-}
-
-func addCommandUpdateCmd() error {
-	Cmd.AddCommand(updateCmd)
-	updateCmd.Flags().StringP("key", "k", "", "API key value")
-
-	return updateCmd.MarkFlagRequired("key")
-
-}
-
-func updateVault(cmd *cobra.Command, args []string) error {
-	err := Credential.ReadFile(Dir, File)
-	if err != nil {
-		if strings.Contains(err.Error(), "no such file or directory") {
-			return fmt.Errorf("No credentials found, please try create a new credential vault first ❌")
-		}
-		return err
-	}
-	keyValue, err := cmd.Flags().GetString("key")
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Updating credentials", Credential.URL)
-
-	if err = Credential.SetInfo(APIKey, keyValue, Credential.URL, Dir, File); err != nil {
-		return err
-	}
-	fmt.Println("Vault configured ✔")
-	return nil
-
-}
-
-func deleteVault(cmd *cobra.Command, args []string) error {
-	if err := Credential.UserInfo(Dir, File); err != nil {
-		return fmt.Errorf("%s ❌", err)
-	}
-
-	if err := os.Remove(Credential.File); err != nil {
-		return fmt.Errorf("%s ❌", err.Error())
-	}
-
-	fmt.Println("Vault deleted ✔")
-	return nil
-
 }
 
 func init() {
