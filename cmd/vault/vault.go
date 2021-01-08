@@ -65,7 +65,10 @@ var HTTP httpcalls.APIData
 var Cmd = &cobra.Command{
 	Use:   "vault",
 	Short: "create or update vault credentials",
-	Long:  `create or update vault credentials.`,
+	Long: `Create or update vault credentials.
+For more information how to create a token please 
+check the API section https://portal.bluesight.io/tutorial.html 
+`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Printf("%v\n", cmd.Long)
 		if err := cmd.Usage(); err != nil {

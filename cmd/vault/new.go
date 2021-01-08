@@ -25,9 +25,11 @@ import (
 )
 
 var newCmd = &cobra.Command{
-	Use:           "new",
-	Short:         "create new vault.",
-	Long:          `create new vault.`,
+	Use:   "new",
+	Short: "create new vault.",
+	Long: `create new vault.
+For more information how to create a token please 
+check the API section https://portal.bluesight.io/tutorial.html `,
 	SilenceErrors: true,
 	Example: `
   Unix Based OS: (use single quotes)
@@ -58,6 +60,7 @@ func addCommandNewCmd() error {
 }
 
 func newVault(cmd *cobra.Command, args []string) error {
+
 	keyValue, err := cmd.Flags().GetString("key")
 	uri, err1 := cmd.Flags().GetString("url")
 

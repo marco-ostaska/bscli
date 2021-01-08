@@ -38,7 +38,7 @@ TDB
 
 Before using the bscli to perform admnistrative tasks you must [configure the bscli vault](docs/cmd/bscli_vault_new.md).
 
-For mor information about the token, [please read this first](https://portal.bluesight.io/tutorial.html) under API section.
+For more information how to create a token, [please read this first](https://portal.bluesight.io/tutorial.html) under API section.
 
 # License
 
