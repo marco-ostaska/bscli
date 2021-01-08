@@ -15,6 +15,9 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+// Package vault is mainly a reference do command vault
+//
+// It also have essentials to vault admnistration to be used throughout the application.
 package vault
 
 import (
@@ -23,20 +26,19 @@ import (
 	"os"
 	"strings"
 
-	"github.com/marco-ostaska/boringstuff"
 	"github.com/marco-ostaska/httpcalls"
 	"github.com/marco-ostaska/uvault"
 	"github.com/spf13/cobra"
 )
 
-// vault basic filesD
+// vault basic constants
 const (
-	Dir    = "bscli"
-	File   = "bscli.vlt"
-	APIKey = "Bluesight-API-Token"
+	Dir    = "bscli"               // Vault user dir
+	File   = "bscli.vlt"           // vault usr file
+	APIKey = "Bluesight-API-Token" // default bluesight token key
 )
 
-// ReadVault reads vault contents
+// ReadVault reads the user vault contents
 func ReadVault() {
 	if err := Credential.ReadFile(Dir, File); err != nil {
 		if strings.Contains(err.Error(), "no such file or directory") {
@@ -48,15 +50,17 @@ func ReadVault() {
 		log.Fatalln(err)
 	}
 
-	httpc.URL = Credential.URL
-	httpc.AuthValue = Credential.DecryptedKValue
-	httpc.AuthKey = Credential.APIKey
+	HTTP.URL = Credential.URL
+	HTTP.AuthValue = Credential.DecryptedKValue
+	HTTP.AuthKey = Credential.APIKey
 
 }
 
 // Credential is a reference to uvault.Credential
 var Credential uvault.Credential
-var httpc httpcalls.APIData
+
+// HTTP is a reference to httpcalls.APIData with uservault uploaded
+var HTTP httpcalls.APIData
 
 // Cmd represents the vault command
 var Cmd = &cobra.Command{
@@ -69,20 +73,6 @@ var Cmd = &cobra.Command{
 			log.Fatalln(err)
 		}
 	},
-}
-
-var newCmd = &cobra.Command{
-	Use:           "new",
-	Short:         "create new vault.",
-	Long:          `create new vault.`,
-	SilenceErrors: true,
-	Example: `
-  Unix Based OS: (use single quotes)
-      sl1cmd vault new -k '<token>' --url 'https://bluesight.com'
-  Windows: (use double quotes)
-      sl1cmd vault new -k "<token>" --url "https://bluesight.com"
-`,
-	RunE: newVault,
 }
 
 var updateCmd = &cobra.Command{
@@ -112,37 +102,6 @@ func addCommandUpdateCmd() error {
 
 	return updateCmd.MarkFlagRequired("key")
 
-}
-
-func addCommandNewCmd() error {
-	Cmd.AddCommand(newCmd)
-	newCmd.Flags().StringP("key", "k", "", "API key value")
-	newCmd.Flags().String("url", "", "API URI")
-
-	err := newCmd.MarkFlagRequired("key")
-	err1 := newCmd.MarkFlagRequired("url")
-
-	if re := boringstuff.ReturnError(err, err1); re != nil {
-		return re
-	}
-
-	return nil
-}
-
-func newVault(cmd *cobra.Command, args []string) error {
-	keyValue, err := cmd.Flags().GetString("key")
-	uri, err1 := cmd.Flags().GetString("url")
-
-	if re := boringstuff.ReturnError(err, err1); re != nil {
-		return re
-	}
-
-	if err = Credential.SetInfo(APIKey, keyValue, uri, Dir, File); err != nil {
-		return err
-	}
-
-	fmt.Println("Vault configured ✔")
-	return nil
 }
 
 func updateVault(cmd *cobra.Command, args []string) error {
@@ -185,11 +144,15 @@ func deleteVault(cmd *cobra.Command, args []string) error {
 func init() {
 	Cmd.AddCommand(deleteCmd)
 
-	err := addCommandNewCmd()
-	err1 := addCommandUpdateCmd()
+	errs := []error{
+		addCommandNewCmd(),
+		addCommandUpdateCmd(),
+	}
 
-	if re := boringstuff.ReturnError(err, err1); re != nil {
-		log.Fatalln(err)
+	for _, err := range errs {
+		if err != nil {
+			log.Fatalln(err)
+		}
 	}
 
 }
