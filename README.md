@@ -20,16 +20,10 @@ bscli is a command line interface provides an interface to interact over daily t
 # Commands
 
 - [bscli](docs/bscli.md) - A command line tool for bluesight.io
-
-### vault
-
-- [vault](docs/bscli_vault.md) - create or update vault credentials.
-
-### squad administration
-
-- [squads](docs/bscli_squads.md) - list the squads for the user
-- [squad](docs/bscli_squad.md) - display information for a given squad
-
+  - [vault](docs/bscli_vault.md) - create or update vault credentials.
+  - [squads](docs/bscli_squads.md) - list the squads for the user
+  - [squad](docs/bscli_squad.md) - display information for a given squad
+  - [mood](docs/bscli_mood.md) - display mood marbles information for a given squad
 
 # Getting Started
 

@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"os"
 
+	"github.com/marco-ostaska/bscli/cmd/card"
 	"github.com/marco-ostaska/bscli/cmd/mood"
 	"github.com/marco-ostaska/bscli/cmd/squad"
 	"github.com/marco-ostaska/bscli/cmd/squads"
@@ -53,6 +54,7 @@ func init() {
 	RootCmd.AddCommand(squads.Cmd)
 	RootCmd.AddCommand(squad.Cmd)
 	RootCmd.AddCommand(mood.Cmd)
+	RootCmd.AddCommand(card.Cmd)
 
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "display this help and exit")
 	RootCmd.Flags().BoolP("version", "v", false, "output version information and exit")
