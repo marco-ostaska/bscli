@@ -20,20 +20,53 @@ package squad
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 )
 
+// graphQL most primitive data for squad resturns
+type graphQL struct {
+	Data struct {
+		Squad struct {
+			ID          string `json:"id"`
+			Description string `json:"description"`
+			Name        string `json:"name"`
+			Users       []struct {
+				Email    string `json:"email"`
+				Fullname string `json:"fullname"`
+			} `json:"users"`
+			SwimlaneWorkstates []struct {
+				Name string `json:"name"`
+			} `json:"swimlaneWorkstates"`
+			Cards []struct {
+				Identifier     string      `json:"identifier"`
+				Title          string      `json:"title"`
+				PrimaryLabels  []string    `json:"primaryLabels"`
+				SecondaryLabel interface{} `json:"secondaryLabel"`
+				Swimlane       string      `json:"swimlane"`
+				WorkstateType  string      `json:"workstateType"`
+				DueAt          string      `json:"dueAt"`
+				Assignees      []struct {
+					Fullname string `json:"fullname"`
+					Email    string `json:"email"`
+				} `json:"assignees"`
+			} `json:"cards"`
+		} `json:"squad"`
+	} `json:"data"`
+}
+
 var flags = []struct {
-	Name  string
-	Short string
-	Call  func(string) error
+	Name        string
+	Short       string
+	Description string
 }{
-	{"name", "n", displayName},
-	{"users", "u", displayUsers},
-	{"swimlaneWorkstates", "s", displayswimlaneWorkstates},
-	{"description", "d", displayDescription},
+	{"name", "n", "display the name of given squad"},
+	{"users", "u", "display the users of given squad"},
+	{"swimlaneWorkstates", "s", "display the swimlane workstates of given squad"},
+	{"description", "d", "display the description of given squad"},
+	{"cards", "c", "diplay active cards of the given squad (Only cards updated in the last month)"},
 }
 
 // Cmd represents the squad command
@@ -44,7 +77,6 @@ var Cmd = &cobra.Command{
 	SilenceErrors: true,
 	Long: `display information for a given squad
 	`,
-
 	RunE: squadMain,
 }
 
@@ -57,46 +89,38 @@ func squadMain(cmd *cobra.Command, args []string) error {
 
 	for _, f := range flags {
 		if cmd.Flag(f.Name).Changed {
-			f.Call(args[0])
+			var gQL graphQL
+			switch f.Name {
+			case "users":
+				if err := gQL.displayUsers(args[0]); err != nil {
+					return err
+				}
+			case "name":
+				if err := gQL.displayName(args[0]); err != nil {
+					return err
+				}
+			case "description":
+				if err := gQL.displayDescription(args[0]); err != nil {
+					return err
+				}
+			case "swimlaneWorkstates":
+				if err := gQL.displayswimlaneWorkstates(args[0]); err != nil {
+					return err
+				}
+
+			case "cards":
+				if err := gQL.displayCards(args[0]); err != nil {
+					return err
+				}
+			}
+
 		}
 	}
 	return nil
 
 }
 
-func queryQL(query, flag string) error {
-	var gQL graphQL
-
-	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
-		return err
-	}
-
-	switch flag {
-	case "users":
-		for _, u := range gQL.Data.Squad.Users {
-			fmt.Printf("- %s (%s)\n", u.Fullname, u.Email)
-		}
-		fmt.Printf("\ntotal: %v\n", gQL.Data.Squad.SquadUsersCount)
-	case "name":
-		fmt.Println(gQL.Data.Squad.Name)
-
-	case "description":
-		fmt.Println(gQL.Data.Squad.Description)
-	case "swimlaneWorkstates":
-		for _, u := range gQL.Data.Squad.SwimlaneWorkstates {
-			fmt.Printf("- %s\n", u.Name)
-		}
-		fmt.Printf("\ntotal: %v\n", len(gQL.Data.Squad.SwimlaneWorkstates))
-
-	default:
-		return fmt.Errorf("unknown flag")
-
-	}
-	return nil
-}
-
-func displayUsers(id string) error {
-
+func (gQL graphQL) displayUsers(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s) {
 		  users{
@@ -107,11 +131,18 @@ func displayUsers(id string) error {
 		}
 	  }`, id)
 
-	return queryQL(query, "users")
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
 
+	for _, u := range gQL.Data.Squad.Users {
+		fmt.Printf("- %s (%s)\n", u.Fullname, u.Email)
+	}
+
+	return nil
 }
 
-func displayswimlaneWorkstates(id string) error {
+func (gQL graphQL) displayswimlaneWorkstates(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s) {
 		  swimlaneWorkstates{
@@ -121,11 +152,17 @@ func displayswimlaneWorkstates(id string) error {
 		}
 	  }`, id)
 
-	return queryQL(query, "swimlaneWorkstates")
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
+
+	for _, sl := range gQL.Data.Squad.SwimlaneWorkstates {
+		fmt.Printf("- %s\n", sl.Name)
+	}
+	return nil
 }
 
-// TODO: need a better way of doing this
-func displayDescription(id string) error {
+func (gQL graphQL) displayDescription(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s) {
 		  description
@@ -133,24 +170,82 @@ func displayDescription(id string) error {
 	  }
 	  `, id)
 
-	return queryQL(query, "description")
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
+	fmt.Println(gQL.Data.Squad.Description)
+
+	return nil
 }
 
-func displayName(id string) error {
+func (gQL graphQL) displayCards(id string) error {
+	now := time.Now()
+	lastMonth := now.AddDate(0, -1, 0)
+
+	query := fmt.Sprintf(`{
+	squad(id: %s){
+		cards(updatedSince: "%v", closed: false){
+		identifier
+		title
+		primaryLabels
+		secondaryLabel
+		swimlane
+		workstateType
+		dueAt
+		assignees{
+			fullname
+			email
+		}   
+		}
+	}
+	}`, id, lastMonth.Format(time.RFC3339))
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
+
+	for _, c := range gQL.Data.Squad.Cards {
+
+		fmt.Println()
+		fmt.Println("Identifier      :", c.Identifier)
+		fmt.Println("Title           :", c.Title)
+		fmt.Println("Work State      :", c.WorkstateType)
+		fmt.Println("SwinLane        :", c.Swimlane)
+		fmt.Println("Due Date        :", c.DueAt)
+		fmt.Print("Assinee(s)      : [")
+		for _, a := range c.Assignees {
+			fmt.Printf(" %v ", a.Email)
+		}
+		fmt.Println("]")
+		if len(c.PrimaryLabels) > 0 {
+			fmt.Println("Primary Label(s):", c.PrimaryLabels)
+		}
+
+		if c.SecondaryLabel != nil {
+			fmt.Println("Secondary Label :", c.SecondaryLabel)
+		}
+
+	}
+	return nil
+}
+
+func (gQL graphQL) displayName(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s) {
 		  name
 		}
 	  }
 	  `, id)
-	return queryQL(query, "name")
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
+	fmt.Println(gQL.Data.Squad.Name)
+	return nil
 }
 
 func init() {
 
 	for _, f := range flags {
-		desc := fmt.Sprintf("display %s for given squad", f.Name)
-		Cmd.Flags().BoolP(f.Name, f.Short, false, desc)
+		Cmd.Flags().BoolP(f.Name, f.Short, false, f.Description)
 	}
 
 }

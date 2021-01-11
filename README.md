@@ -28,11 +28,8 @@ bscli is a command line interface provides an interface to interact over daily t
 ### squad administration
 
 - [squads](docs/bscli_squads.md) - list the squads for the user
+- [squad](docs/bscli_squad.md) - display information for a given squad
 
-
-# Installing
-
-TDB
 
 # Getting Started
 
