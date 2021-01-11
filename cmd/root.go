@@ -1,4 +1,3 @@
-// +build !docs
 /*
 Copyright © 2021 Marco Ostaska
 

@@ -11,6 +11,7 @@ A command line tool for bluesight.io
 
 ### SEE ALSO
 
+* [bscli mood](bscli_mood.md)	 - display mood marbles information for a given squad
 * [bscli squad](bscli_squad.md)	 - display information for a given squad
 * [bscli squads](bscli_squads.md)	 - list the squads for the user
 * [bscli vault](bscli_vault.md)	 - create or update vault credentials
