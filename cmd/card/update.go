@@ -70,9 +70,17 @@ func buildQueryUpdate() (string, error) {
 	query = fmt.Sprintf("%s    input: {\n", query)
 	query = fmt.Sprintf(`%s      cardIdentifier: "%s"`+"\n", query, flags.card)
 	query = fmt.Sprintf("%s      cardAttributes: {\n", query)
-	query = fmt.Sprintf(`%s        swimlaneName: "%s"`+"\n", query, flags.swimlane)
-	query = fmt.Sprintf(`%s        workstateName: "%s"`+"\n", query, flags.workstate)
-	query = fmt.Sprintf(`%s        title: "%s"`+"\n", query, flags.title)
+	if len(flags.swimlane) > 0 {
+		query = fmt.Sprintf(`%s        swimlaneName: "%s"`+"\n", query, flags.swimlane)
+	}
+
+	if len(flags.workstate) > 0 {
+		query = fmt.Sprintf(`%s        workstateName: "%s"`+"\n", query, flags.workstate)
+	}
+
+	if len(flags.title) > 0 {
+		query = fmt.Sprintf(`%s        title: "%s"`+"\n", query, flags.title)
+	}
 
 	if len(flags.dueDate) > 0 {
 		if err := validateDueDate(flags.dueDate); err != nil {
@@ -182,17 +190,8 @@ func init() {
 	updateCmd.Flags().StringSliceVarP(&flags.primarylabel, "primarylabel", "p", nil, "card primary label names")
 	updateCmd.Flags().StringVar(&flags.dueDate, "dueDate", "", "card due date")
 
-	errs := [4]error{
-		updateCmd.MarkFlagRequired("card"),
-		updateCmd.MarkFlagRequired("swimlane"),
-		updateCmd.MarkFlagRequired("workstate"),
-		updateCmd.MarkFlagRequired("title"),
-	}
-
-	for _, err := range errs {
-		if err != nil {
-			return
-		}
+	if err := updateCmd.MarkFlagRequired("card"); err != nil {
+		return
 	}
 
 }
