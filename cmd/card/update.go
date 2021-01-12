@@ -19,15 +19,14 @@ package card
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 )
 
-type graphQL struct {
+type graphQLUpdate struct {
 	Data struct {
-		CreateCard struct {
+		UpdateCard struct {
 			Card struct {
 				Identifier string `json:"identifier"`
 				Title      string `json:"title"`
@@ -35,7 +34,7 @@ type graphQL struct {
 			Errors []struct {
 				Message string `json:"message"`
 			} `json:"errors"`
-		} `json:"createCard"`
+		} `json:"UpdateCard"`
 	} `json:"data"`
 	Errors []struct {
 		Message   string `json:"message"`
@@ -48,12 +47,12 @@ type graphQL struct {
 }
 
 // cardsCmd represents the cards command
-var createCmd = &cobra.Command{
-	Use:   "create",
-	Short: "create a new card for squad",
-	Long: `create a new card for squad
+var updateCmd = &cobra.Command{
+	Use:   "update",
+	Short: "update an existing card",
+	Long: `update an existing card
 	`,
-	Example: `bscli card create --squad 01234 -s "Default Swimlane" \
+	Example: `bscli card update --card "09lfdk" -s "Default Swimlane" \
 -w "Backlog" \
 -t "My new card" \
 -d "My new card<br>new line>" \
@@ -61,38 +60,16 @@ var createCmd = &cobra.Command{
 -a "assingee@email.com" -a "assingee2@email.com" \
 --dueDate "01/31/2021 15:00:00"
 `,
-	RunE: create,
+	RunE: update,
 }
 
-func validateDueDate(dueDate string) error {
-	layout := "01/02/2006 15:04:05"
-	_, err := time.Parse(layout, dueDate)
-
-	if err != nil {
-		return fmt.Errorf(`Invalid dueDate, it should be in "MM/dd/yyyy HH:mm:ss" format`)
-	}
-	return nil
-}
-
-func fmtStringSlice(s []string) string {
-	q := "["
-	for _, v := range s {
-		q = q + fmt.Sprintf(`  
-		{ value: "%s" },`, v)
-	}
-
-	q = fmt.Sprintf("%s\n        ]", q)
-
-	return q
-}
-
-func buildQuery() (string, error) {
+func buildQueryUpdate() (string, error) {
 
 	query := fmt.Sprintln("mutation {")
-	query = fmt.Sprintf("%s  createCard(\n", query)
+	query = fmt.Sprintf("%s  updateCard(\n", query)
 	query = fmt.Sprintf("%s    input: {\n", query)
+	query = fmt.Sprintf(`%s      cardIdentifier: "%s"`+"\n", query, flags.card)
 	query = fmt.Sprintf("%s      cardAttributes: {\n", query)
-	query = fmt.Sprintf("%s        squadId: %s\n", query, flags.squad)
 	query = fmt.Sprintf(`%s        swimlaneName: "%s"`+"\n", query, flags.swimlane)
 	query = fmt.Sprintf(`%s        workstateName: "%s"`+"\n", query, flags.workstate)
 	query = fmt.Sprintf(`%s        title: "%s"`+"\n", query, flags.title)
@@ -139,27 +116,15 @@ func buildQuery() (string, error) {
 
 }
 
-var flags struct {
-	squad        string
-	card         string
-	swimlane     string
-	workstate    string
-	title        string
-	description  string
-	assignees    []string
-	primarylabel []string
-	dueDate      string
-}
+func update(cmd *cobra.Command, args []string) error {
 
-func create(cmd *cobra.Command, args []string) error {
-
-	query, err := buildQuery()
+	query, err := buildQueryUpdate()
 	if err != nil {
 		return err
 	}
 
 	vault.ReadVault()
-	var gQL graphQL
+	var gQL graphQLUpdate
 
 	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
 		return err
@@ -168,20 +133,15 @@ func create(cmd *cobra.Command, args []string) error {
 	if len(gQL.Errors) > 0 {
 
 		for _, e := range gQL.Errors {
-			switch e.Message {
-			case "Squad must exist":
-				return fmt.Errorf(e.Message)
-			default:
-				return fmt.Errorf(e.Message)
-			}
+			return fmt.Errorf(e.Message)
 		}
 	}
 
-	if len(gQL.Data.CreateCard.Errors) > 0 {
+	if len(gQL.Data.UpdateCard.Errors) > 0 {
 
 		errCount := 1
 
-		for _, e := range gQL.Data.CreateCard.Errors {
+		for _, e := range gQL.Data.UpdateCard.Errors {
 
 			switch e.Message {
 			case "not found by email":
@@ -191,7 +151,7 @@ func create(cmd *cobra.Command, args []string) error {
 			case "must exist for the selected workstateName":
 				return fmt.Errorf("selected workstateName not found for squad, card not created")
 			case "must exist":
-				if errCount < len(gQL.Data.CreateCard.Errors) {
+				if errCount < len(gQL.Data.UpdateCard.Errors) {
 					errCount++
 					continue
 				}
@@ -204,29 +164,29 @@ func create(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("card created successfull")
-	fmt.Println("Identifier:", gQL.Data.CreateCard.Card.Identifier)
-	fmt.Println("Title     :", gQL.Data.CreateCard.Card.Title)
+	fmt.Println("card updated successfull")
+	fmt.Println("Identifier:", gQL.Data.UpdateCard.Card.Identifier)
+	fmt.Println("Title     :", gQL.Data.UpdateCard.Card.Title)
 
 	return nil
 }
 
 func init() {
 
-	createCmd.Flags().StringVar(&flags.squad, "squad", "", "squad id")
-	createCmd.Flags().StringVarP(&flags.swimlane, "swimlane", "s", "", "swimlane name")
-	createCmd.Flags().StringVarP(&flags.workstate, "workstate", "w", "", "workstate name")
-	createCmd.Flags().StringVarP(&flags.title, "title", "t", "", "card title")
-	createCmd.Flags().StringVarP(&flags.description, "description", "d", "", "card description")
-	createCmd.Flags().StringSliceVarP(&flags.assignees, "assignees", "a", nil, "card assignee emails")
-	createCmd.Flags().StringSliceVarP(&flags.primarylabel, "primarylabel", "p", nil, "card primary label names")
-	createCmd.Flags().StringVar(&flags.dueDate, "dueDate", "", "card due date")
+	updateCmd.Flags().StringVar(&flags.card, "card", "", "card identifier")
+	updateCmd.Flags().StringVarP(&flags.swimlane, "swimlane", "s", "", "swimlane name")
+	updateCmd.Flags().StringVarP(&flags.workstate, "workstate", "w", "", "workstate name")
+	updateCmd.Flags().StringVarP(&flags.title, "title", "t", "", "card title")
+	updateCmd.Flags().StringVarP(&flags.description, "description", "d", "", "card description")
+	updateCmd.Flags().StringSliceVarP(&flags.assignees, "assignees", "a", nil, "card assignee emails")
+	updateCmd.Flags().StringSliceVarP(&flags.primarylabel, "primarylabel", "p", nil, "card primary label names")
+	updateCmd.Flags().StringVar(&flags.dueDate, "dueDate", "", "card due date")
 
 	errs := [4]error{
-		createCmd.MarkFlagRequired("squad"),
-		createCmd.MarkFlagRequired("swimlane"),
-		createCmd.MarkFlagRequired("workstate"),
-		createCmd.MarkFlagRequired("title"),
+		updateCmd.MarkFlagRequired("card"),
+		updateCmd.MarkFlagRequired("swimlane"),
+		updateCmd.MarkFlagRequired("workstate"),
+		updateCmd.MarkFlagRequired("title"),
 	}
 
 	for _, err := range errs {

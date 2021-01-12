@@ -30,10 +30,12 @@ var Cmd = &cobra.Command{
 	Long: `create or update cards
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("cards called")
+		fmt.Println(cmd.Long)
+		cmd.Usage()
 	},
 }
 
 func init() {
 	Cmd.AddCommand(createCmd)
+	Cmd.AddCommand(updateCmd)
 }
