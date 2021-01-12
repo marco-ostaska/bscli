@@ -25,7 +25,19 @@ bscli is a command line interface provides an interface to interact over daily t
   - [squad](docs/bscli_squad.md) - display information for a given squad
   - [mood](docs/bscli_mood.md) - display mood marbles information for a given squad
   - [card](docs/bscli_card.md) - create or update cards
-  
+
+# Install
+
+[download](releases) the binary
+
+Put it in a safe place and make it executable
+
+```shell
+# For linux and mac only
+chmod +x bscli-<platform>-<version>
+```
+
+Then simply execute the app.
 
 # Getting Started
 
