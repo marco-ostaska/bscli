@@ -1,10 +1,10 @@
 ## bscli card
 
-create or update cards
+create, update or create comment for a given card
 
 ### Synopsis
 
-create or update cards
+create, update or create comment for a given card
 	
 
 ```

@@ -11,7 +11,7 @@ A command line tool for bluesight.io
 
 ### SEE ALSO
 
-* [bscli card](bscli_card.md)	 - create or update cards
+* [bscli card](bscli_card.md)	 - create, update or create comment for a given card
 * [bscli mood](bscli_mood.md)	 - display mood marbles information for a given squad
 * [bscli squad](bscli_squad.md)	 - display information for a given squad
 * [bscli squads](bscli_squads.md)	 - list the squads for the user

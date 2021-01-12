@@ -26,8 +26,8 @@ import (
 // Cmd represents the cards command
 var Cmd = &cobra.Command{
 	Use:   "card",
-	Short: "create or update cards",
-	Long: `create or update cards
+	Short: "create, update or create comment for a given card",
+	Long: `create, update or create comment for a given card
 	`,
 	Run: func(cmd *cobra.Command, args []string) {
 		fmt.Println(cmd.Long)
