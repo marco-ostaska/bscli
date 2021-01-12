@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 )
 
@@ -31,9 +32,19 @@ type graphQL struct {
 				Identifier string `json:"identifier"`
 				Title      string `json:"title"`
 			} `json:"card"`
-			Errors interface{} `json:"errors"`
+			Errors []struct {
+				Message string `json:"message"`
+			} `json:"errors"`
 		} `json:"createCard"`
 	} `json:"data"`
+	Errors []struct {
+		Message   string `json:"message"`
+		Locations []struct {
+			Line   int `json:"line"`
+			Column int `json:"column"`
+		} `json:"locations"`
+		Path []string `json:"path"`
+	} `json:"errors"`
 }
 
 // cardsCmd represents the cards command
@@ -44,8 +55,8 @@ var createCmd = &cobra.Command{
 	`,
 	Example: `bscli card create --squad 01234 -s "Default Swimlane" \
 -w "Backlog" \
--t "My new card" 
--d "My new card<br>new line> \
+-t "My new card" \
+-d "My new card<br>new line>" \
 -p "Primary label1" -p "primary label2" \
 -a "assingee@email.com" -a "assingee2@email.com" \
 --dueDate "01/31/2021 15:00:00"
@@ -53,19 +64,14 @@ var createCmd = &cobra.Command{
 	RunE: create,
 }
 
-func validateDueDate(cmd *cobra.Command) (string, error) {
-
+func validateDueDate(dueDate string) error {
 	layout := "01/02/2006 15:04:05"
-	dueDate, err := cmd.Flags().GetString("dueDate")
-	if err != nil {
-		return dueDate, err
-	}
-	_, err = time.Parse(layout, dueDate)
+	_, err := time.Parse(layout, dueDate)
 
 	if err != nil {
-		return dueDate, fmt.Errorf(`Invalid dueDate, it should be in "MM/dd/yyyy HH:mm:ss" format`)
+		return fmt.Errorf(`Invalid dueDate, it should be in "MM/dd/yyyy HH:mm:ss" format`)
 	}
-	return dueDate, err
+	return nil
 }
 
 func fmtStringSlice(s []string) string {
@@ -80,41 +86,35 @@ func fmtStringSlice(s []string) string {
 	return q
 }
 
-func buildQuery() {
+func buildQuery() (string, error) {
 
 	query := fmt.Sprintln("mutation {")
 	query = fmt.Sprintf("%s  createCard(\n", query)
 	query = fmt.Sprintf("%s    input: {\n", query)
 	query = fmt.Sprintf("%s      cardAttributes: {\n", query)
-	id := "012345"
-	query = fmt.Sprintf("%s        squadId: %s\n", query, id)
-	swimlaneName := "Default swimlaneName"
-	query = fmt.Sprintf(`%s        swimlaneName: "%s"`+"\n", query, swimlaneName)
-	workstateName := "Backlog"
-	query = fmt.Sprintf(`%s        workstateName: "%s"`+"\n", query, workstateName)
-	title := "Mais um teste bug email"
-	query = fmt.Sprintf(`%s        title: "%s"`+"\n", query, title)
-	//dueDate := "01/31/2021 15:00:00"
-	dueDate := ""
-	if len(dueDate) > 0 {
-		query = fmt.Sprintf(`%s        dueDate: "%s"`+"\n", query, dueDate)
-	}
-	var description string
-	//description := "Ola amiguinhos"
-	if len(description) > 0 {
-		query = fmt.Sprintf(`%s        description: "%s"`+"\n", query, description)
+	query = fmt.Sprintf("%s        squadId: %s\n", query, flags.squad)
+	query = fmt.Sprintf(`%s        swimlaneName: "%s"`+"\n", query, flags.swimlane)
+	query = fmt.Sprintf(`%s        workstateName: "%s"`+"\n", query, flags.workstate)
+	query = fmt.Sprintf(`%s        title: "%s"`+"\n", query, flags.title)
+
+	if len(flags.dueDate) > 0 {
+		if err := validateDueDate(flags.dueDate); err != nil {
+			return flags.dueDate, err
+		}
+		query = fmt.Sprintf(`%s        dueDate: "%s"`+"\n", query, flags.dueDate)
 	}
 
-	email := fmtStringSlice([]string{""})
+	if len(flags.description) > 0 {
+		query = fmt.Sprintf(`%s        description: "%s"`+"\n", query, flags.description)
+	}
 
-	if len(email) > 0 {
+	if len(flags.assignees) > 0 {
+		email := fmtStringSlice(flags.assignees)
 		query = fmt.Sprintf(`%s        assigneeEmails: %s`+"\n", query, email)
 	}
 
-	var pr []string
-
-	if pr != nil {
-		primaryLabelNames := fmtStringSlice([]string{"L 1", "2 @ email"})
+	if len(flags.primarylabel) > 0 {
+		primaryLabelNames := fmtStringSlice(flags.primarylabel)
 		query = fmt.Sprintf(`%s        primaryLabelNames: %s`+"\n", query, primaryLabelNames)
 
 	}
@@ -135,79 +135,103 @@ func buildQuery() {
 
 	query = fmt.Sprintf("%s %s", query, endQuery)
 
-	fmt.Println(query)
+	return query, nil
 
+}
+
+var flags struct {
+	squad        string
+	swimlane     string
+	workstate    string
+	title        string
+	description  string
+	assignees    []string
+	primarylabel []string
+	dueDate      string
 }
 
 func create(cmd *cobra.Command, args []string) error {
 
-	// dueDate, err := validateDueDate(cmd)
+	query, err := buildQuery()
+	if err != nil {
+		return err
+	}
 
-	// if err != nil {
-	// 	return err
-	// }
-	// fmt.Println(dueDate)
+	vault.ReadVault()
+	var gQL graphQL
 
-	buildQuery()
-	// fmt.Println(pLabels)
+	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		return err
+	}
 
-	// query := `mutation{
-	// 	createCard(
-	// 	  input: {
-	// 		cardAttributes: {
-	// 		  squadId: 35106
-	// 		  swimlaneName: "Default "
-	// 		  workstateName: "Backlog"
-	// 		  title: "Mais um teste bug email"
-	// 		  dueDate: "01/31/2021 15:00:00"
-	// 		  primaryLabelNames: [
-	// 			{ value: "bug report"},
-	// 			{ value: "bug report2"},
-	// 		  ]
-	// 		  description: "ola amiguinhos"
-	// 		  assigneeEmails: [
-	// 			{ value: "marcoan@ccccc"},
-	// 			{ value: "jnzaia@cccccc"},
-	// 		  ]
-	// 		}
-	// 	  }
-	// 	)
-	// 	{
-	// 	  card {
-	// 		identifier
-	// 		title
-	// 	  }
-	// 	  errors {
-	// 		message
-	// 	  }
-	// 	}
-	//   }`
+	if len(gQL.Errors) > 0 {
+
+		for _, e := range gQL.Errors {
+			switch e.Message {
+			case "Squad must exist":
+				return fmt.Errorf(e.Message)
+			default:
+				return fmt.Errorf(e.Message)
+			}
+		}
+	}
+
+	if len(gQL.Data.CreateCard.Errors) > 0 {
+
+		errCount := 1
+
+		for _, e := range gQL.Data.CreateCard.Errors {
+
+			switch e.Message {
+			case "not found by email":
+				return fmt.Errorf("assignee(s) email(s) not found for squad, card not created, please check assignee(s) ans try again")
+			case "not found by name":
+				return fmt.Errorf("Primary Label(s) not found for squad, card not created, primary label must exist in bluesight")
+			case "must exist for the selected workstateName":
+				return fmt.Errorf("selected workstateName not found for squad, card not created")
+			case "must exist":
+				if errCount < len(gQL.Data.CreateCard.Errors) {
+					errCount++
+					continue
+				}
+				return fmt.Errorf("All fields must exist in BlueSight, please check all of them. (Probably wrong Swimlane")
+			case "Must be after opened date":
+				return fmt.Errorf("dueDate must be higher than opened date")
+			default:
+				return fmt.Errorf(e.Message)
+			}
+		}
+	}
+
+	fmt.Println("card created successfull")
+	fmt.Println("Identifier:", gQL.Data.CreateCard.Card.Identifier)
+	fmt.Println("Title     :", gQL.Data.CreateCard.Card.Title)
 
 	return nil
 }
 
 func init() {
 
-	createCmd.Flags().String("squad", "", "squad id")
-	createCmd.Flags().StringP("swimlane", "s", "", "swimlane name")
-	createCmd.Flags().StringP("workstate", "w", "", "workstate name")
-	createCmd.Flags().StringP("title", "t", "", "card title")
-	createCmd.Flags().StringP("description", "d", "", "card description")
-	createCmd.Flags().StringSliceP("assignee", "a", nil, "card assignee emails")
-	createCmd.Flags().StringSliceP("primarylabel", "p", nil, "card primary label names")
-	createCmd.Flags().String("dueDate", "", "card due date")
+	createCmd.Flags().StringVar(&flags.squad, "squad", "", "squad id")
+	createCmd.Flags().StringVarP(&flags.swimlane, "swimlane", "s", "", "swimlane name")
+	createCmd.Flags().StringVarP(&flags.workstate, "workstate", "w", "", "workstate name")
+	createCmd.Flags().StringVarP(&flags.title, "title", "t", "", "card title")
+	createCmd.Flags().StringVarP(&flags.description, "description", "d", "", "card description")
+	createCmd.Flags().StringSliceVarP(&flags.assignees, "assignees", "a", nil, "card assignee emails")
+	createCmd.Flags().StringSliceVarP(&flags.primarylabel, "primarylabel", "p", nil, "card primary label names")
+	createCmd.Flags().StringVar(&flags.dueDate, "dueDate", "", "card due date")
 
-	// errs := [4]error{
-	// 	createCmd.MarkFlagRequired("squad"),
-	// 	createCmd.MarkFlagRequired("swimlane"),
-	// 	createCmd.MarkFlagRequired("workstate"),
-	// 	createCmd.MarkFlagRequired("title"),
-	// }
+	errs := [4]error{
+		createCmd.MarkFlagRequired("squad"),
+		createCmd.MarkFlagRequired("swimlane"),
+		createCmd.MarkFlagRequired("workstate"),
+		createCmd.MarkFlagRequired("title"),
+	}
 
-	// for _, err := range errs {
-	// 	if err != nil {
-	// 		return
-	// 	}
-	// }
+	for _, err := range errs {
+		if err != nil {
+			return
+		}
+	}
 
 }

@@ -24,6 +24,8 @@ bscli is a command line interface provides an interface to interact over daily t
   - [squads](docs/bscli_squads.md) - list the squads for the user
   - [squad](docs/bscli_squad.md) - display information for a given squad
   - [mood](docs/bscli_mood.md) - display mood marbles information for a given squad
+  - [card](docs/bscli_card.md) - create or update cards
+  
 
 # Getting Started
 
