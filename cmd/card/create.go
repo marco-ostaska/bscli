@@ -149,6 +149,7 @@ var flags struct {
 	assignees    []string
 	primarylabel []string
 	dueDate      string
+	comment      string
 }
 
 func create(cmd *cobra.Command, args []string) error {
