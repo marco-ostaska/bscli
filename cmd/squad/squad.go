@@ -121,7 +121,12 @@ func squadMain(cmd *cobra.Command, args []string) error {
 				if err != nil {
 					return err
 				}
-				if err := gQL.displayCards(args[0], email, sl); err != nil {
+				pl, err := cmd.Flags().GetString("cardPL")
+				if err != nil {
+					return err
+				}
+
+				if err := gQL.displayCards(args[0], email, sl, pl); err != nil {
 					return err
 				}
 			}
@@ -209,7 +214,7 @@ func (gQL graphQL) displayDescription(id string) error {
 	return nil
 }
 
-func (gQL graphQL) displayCards(id, email, sl string) error {
+func (gQL graphQL) displayCards(id, email, sl, pl string) error {
 	now := time.Now()
 	lastMonth := now.AddDate(0, -1, 0)
 
@@ -237,37 +242,37 @@ func (gQL graphQL) displayCards(id, email, sl string) error {
 	for _, c := range gQL.Data.Squad.Cards {
 
 		var emailOK bool
-		var SwimlaneOK bool
+		var slOK bool
+		var plOK bool
 
-		switch {
-		case len(email) > 0 && len(sl) < 1:
-			for _, a := range c.Assignees {
-				if a.Email == email {
-					emailOK = true
-					SwimlaneOK = true
-				}
-			}
-		case len(sl) > 0 && len(email) < 1:
-			if c.Swimlane == sl {
-				SwimlaneOK = true
+		for _, a := range c.Assignees {
+			if a.Email == email {
 				emailOK = true
 			}
-		case len(email) > 0 && len(sl) > 0:
-			for _, a := range c.Assignees {
-				if a.Email == email && c.Swimlane == sl {
-					emailOK = true
-					SwimlaneOK = true
-				}
-			}
 
-		default:
-			SwimlaneOK = true
-			emailOK = true
 		}
 
-		fmt.Println(emailOK, SwimlaneOK, len(email))
+		for _, p := range c.PrimaryLabels {
+			if p == pl {
+				plOK = true
+			}
 
-		if !emailOK || !SwimlaneOK {
+		}
+
+		if c.Swimlane == sl {
+			slOK = true
+		}
+
+		switch {
+		case len(email) == 0:
+			emailOK = true
+		case len(sl) == 0:
+			slOK = true
+		case len(pl) == 0:
+			plOK = true
+		}
+
+		if !emailOK || !slOK || !plOK {
 			continue
 		}
 
@@ -316,4 +321,5 @@ func init() {
 
 	Cmd.Flags().String("cardEmail", "", "grep cards with for given email (works with card only)")
 	Cmd.Flags().String("cardSL", "", "grep cards with for given SwinLane (works with card only)")
+	Cmd.Flags().String("cardPL", "", "grep cards with for given Primary Label (works with card only)")
 }
