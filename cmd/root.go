@@ -27,7 +27,6 @@ import (
 	"github.com/marco-ostaska/bscli/cmd/squads"
 	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
-	"github.com/spf13/cobra/doc"
 )
 
 var version string
@@ -46,7 +45,7 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	doc.GenMarkdownTree(RootCmd, "./docs")
+	//doc.GenMarkdownTree(RootCmd, "./docs")
 }
 
 func init() {
