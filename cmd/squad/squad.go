@@ -38,7 +38,10 @@ type graphQL struct {
 				Fullname string `json:"fullname"`
 			} `json:"users"`
 			SwimlaneWorkstates []struct {
-				Name string `json:"name"`
+				Name              string   `json:"name"`
+				BacklogWorkstates []string `json:"backlogWorkstates"`
+				ActiveWorkstates  []string `json:"activeWorkstates"`
+				WaitWorkstates    []string `json:"waitWorkstates"`
 			} `json:"swimlaneWorkstates"`
 			Cards []struct {
 				Identifier     string      `json:"identifier"`
@@ -146,8 +149,10 @@ func (gQL graphQL) displayswimlaneWorkstates(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s) {
 		  swimlaneWorkstates{
-			activeWorkstates
 			name
+			backlogWorkstates
+			activeWorkstates
+			waitWorkstates
 		  }
 		}
 	  }`, id)
@@ -157,9 +162,26 @@ func (gQL graphQL) displayswimlaneWorkstates(id string) error {
 	}
 
 	for _, sl := range gQL.Data.Squad.SwimlaneWorkstates {
-		fmt.Printf("- %s\n", sl.Name)
+		fmt.Println(sl.Name)
+		printTree("Backlog WorkStates", sl.BacklogWorkstates)
+		printTree("Active WorkStates", sl.ActiveWorkstates)
+		printTree("Wait WorkStates", sl.WaitWorkstates)
+		fmt.Println()
 	}
 	return nil
+}
+
+func printTree(t string, s []string) {
+
+	if len(s) == 0 {
+		return
+	}
+
+	fmt.Printf("├── %s:\n", t)
+	for i := 0; i < len(s); i++ {
+		fmt.Println("|   └──", s[i])
+	}
+
 }
 
 func (gQL graphQL) displayDescription(id string) error {
