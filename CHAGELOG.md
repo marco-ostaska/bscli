@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [0.3.0-filter] - 2021-01-14
+### Fixed
+- add filters for squad card
+
 ## [0.2.1-card] - 2021-01-13
 ### Fixed
 - card update command

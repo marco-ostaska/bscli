@@ -1,4 +1,2 @@
-- display workstate for a swinlane
-- filter card for a squad by swinlane
-- filter card for a squad by assagnee
-- filter card for a squad and swinlane by assagnee
+- filter card for a primary label
+- make squad with subcommands to make it less confuse

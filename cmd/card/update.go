@@ -194,4 +194,8 @@ func init() {
 		return
 	}
 
+	if err := updateCmd.MarkFlagRequired("swimlane"); err != nil {
+		return
+	}
+
 }
