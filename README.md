@@ -41,7 +41,7 @@ Then simply execute the app.
 
 # Getting Started
 
-Before using the bscli to perform admnistrative tasks you must [configure the bscli vault](docs/cmd/bscli_vault_new.md).
+Before using the bscli to perform admnistrative tasks you must [configure the bscli vault](docs/bscli_vault_new.md)).
 
 For more information how to create a token, [please read this first](https://portal.bluesight.io/tutorial.html) under API section.
 
