@@ -276,12 +276,15 @@ func (gQL graphQL) displayCards(id, email, sl, pl string) error {
 			slOK = true
 		}
 
-		switch {
-		case len(email) == 0:
+		if len(email) == 0 {
 			emailOK = true
-		case len(sl) == 0:
+		}
+
+		if len(sl) == 0 {
 			slOK = true
-		case len(pl) == 0:
+		}
+
+		if len(pl) == 0 {
 			plOK = true
 		}
 
