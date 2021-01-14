@@ -175,13 +175,25 @@ func (gQL graphQL) displayswimlaneWorkstates(id string) error {
 		return err
 	}
 
+	SwimlaneWorkstatesTotal := len(gQL.Data.Squad.SwimlaneWorkstates)
+	var BacklogWorkstatesTotal int
+	var ActiveWorkstatesTotal int
+	var WaitWorkstatesTotal int
+
 	for _, sl := range gQL.Data.Squad.SwimlaneWorkstates {
 		fmt.Println(sl.Name)
 		printTree("Backlog WorkStates", sl.BacklogWorkstates)
 		printTree("Active WorkStates", sl.ActiveWorkstates)
 		printTree("Wait WorkStates", sl.WaitWorkstates)
 		fmt.Println()
+		BacklogWorkstatesTotal += len(sl.BacklogWorkstates)
+		ActiveWorkstatesTotal += len(sl.ActiveWorkstates)
+		WaitWorkstatesTotal += len(sl.WaitWorkstates)
+
 	}
+
+	fmt.Printf("%v SwimlaneWorkstates, %v BacklogWorkstates, %v ActiveWorkstates,  %v WaitWorkstates\n",
+		SwimlaneWorkstatesTotal, BacklogWorkstatesTotal, ActiveWorkstatesTotal, WaitWorkstatesTotal)
 	return nil
 }
 
@@ -193,7 +205,8 @@ func printTree(t string, s []string) {
 
 	fmt.Printf("├── %s:\n", t)
 	for i := 0; i < len(s); i++ {
-		fmt.Println("|   └──", s[i])
+		fmt.Println("│   └──", s[i])
+
 	}
 
 }
