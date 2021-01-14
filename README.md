@@ -28,7 +28,7 @@ bscli is a command line interface provides an interface to interact over daily t
 
 # Install
 
-[download](releases) the binary
+[download](https://github.com/marco-ostaska/bscli/releases) the binary
 
 Put it in a safe place and make it executable
 
