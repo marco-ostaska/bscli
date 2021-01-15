@@ -65,17 +65,12 @@ var flags = []struct {
 	Short       string
 	Description string
 }{
-	{"name", "n", "display the name of given squad"},
-	{"users", "u", "display the users of given squad"},
 	{"swimlaneWorkstates", "s", "display the swimlane workstates of given squad"},
-	{"description", "d", "display the description of given squad"},
-	{"cards", "c", "diplay active cards of the given squad (Only cards updated in the last month)"},
 }
 
 // Cmd represents the squad command
 var Cmd = &cobra.Command{
-	Use:           "squad [id]...",
-	Args:          cobra.ExactArgs(1),
+	Use:           "squad",
 	Short:         "display information for a given squad",
 	SilenceErrors: true,
 	Long: `display information for a given squad
@@ -85,78 +80,23 @@ var Cmd = &cobra.Command{
 
 func squadMain(cmd *cobra.Command, args []string) error {
 
-	if cmd.Flags().NFlag() < 1 {
-		return fmt.Errorf("No flag(s) received")
-	}
 	vault.ReadVault()
 
 	for _, f := range flags {
 		if cmd.Flag(f.Name).Changed {
 			var gQL graphQL
 			switch f.Name {
-			case "users":
-				if err := gQL.displayUsers(args[0]); err != nil {
-					return err
-				}
-			case "name":
-				if err := gQL.displayName(args[0]); err != nil {
-					return err
-				}
-			case "description":
-				if err := gQL.displayDescription(args[0]); err != nil {
-					return err
-				}
 			case "swimlaneWorkstates":
 				if err := gQL.displayswimlaneWorkstates(args[0]); err != nil {
 					return err
 				}
 
-			case "cards":
-				email, err := cmd.Flags().GetString("cardEmail")
-				if err != nil {
-					return err
-				}
-
-				sl, err := cmd.Flags().GetString("cardSL")
-				if err != nil {
-					return err
-				}
-				pl, err := cmd.Flags().GetString("cardPL")
-				if err != nil {
-					return err
-				}
-
-				if err := gQL.displayCards(args[0], email, sl, pl); err != nil {
-					return err
-				}
 			}
 
 		}
 	}
 	return nil
 
-}
-
-func (gQL graphQL) displayUsers(id string) error {
-	query := fmt.Sprintf(`{
-		squad(id: %s) {
-		  users{
-			email
-			fullname
-		  }
-		  squadUsersCount
-		}
-	  }`, id)
-
-	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
-		return err
-	}
-
-	for _, u := range gQL.Data.Squad.Users {
-		fmt.Printf("- %s (%s)\n", u.Fullname, u.Email)
-	}
-
-	return nil
 }
 
 func (gQL graphQL) displayswimlaneWorkstates(id string) error {
@@ -211,131 +151,30 @@ func printTree(t string, s []string) {
 
 }
 
-func (gQL graphQL) displayDescription(id string) error {
-	query := fmt.Sprintf(`{
-		squad(id: %s) {
-		  description
-		}
-	  }
-	  `, id)
-
-	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
-		return err
-	}
-	fmt.Println(gQL.Data.Squad.Description)
-
-	return nil
-}
-
-func (gQL graphQL) displayCards(id, email, sl, pl string) error {
-	now := time.Now()
-	lastMonth := now.AddDate(0, -1, 0)
-
-	query := fmt.Sprintf(`{
-	squad(id: %s){
-		cards(updatedSince: "%v", closed: false){
-		identifier
-		title
-		primaryLabels
-		secondaryLabel
-		swimlane
-		workstateType
-		dueAt
-		assignees{
-			fullname
-			email
-		}   
-		}
-	}
-	}`, id, lastMonth.Format(time.RFC3339))
-	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
-		return err
-	}
-
-	for _, c := range gQL.Data.Squad.Cards {
-
-		var emailOK bool
-		var slOK bool
-		var plOK bool
-
-		for _, a := range c.Assignees {
-			if a.Email == email {
-				emailOK = true
-			}
-
-		}
-
-		for _, p := range c.PrimaryLabels {
-			if p == pl {
-				plOK = true
-			}
-
-		}
-
-		if c.Swimlane == sl {
-			slOK = true
-		}
-
-		if len(email) == 0 {
-			emailOK = true
-		}
-
-		if len(sl) == 0 {
-			slOK = true
-		}
-
-		if len(pl) == 0 {
-			plOK = true
-		}
-
-		if !emailOK || !slOK || !plOK {
-			continue
-		}
-
-		fmt.Println()
-		fmt.Println("Identifier      :", c.Identifier)
-		fmt.Println("Title           :", c.Title)
-		fmt.Println("Work State      :", c.WorkstateType)
-		fmt.Println("SwinLane        :", c.Swimlane)
-		fmt.Println("Due Date        :", c.DueAt)
-		fmt.Print("Assinee(s)      : [")
-		for _, a := range c.Assignees {
-			fmt.Printf(" %v ", a.Email)
-		}
-		fmt.Println("]")
-		if len(c.PrimaryLabels) > 0 {
-			fmt.Println("Primary Label(s):", c.PrimaryLabels)
-		}
-
-		if c.SecondaryLabel != nil {
-			fmt.Println("Secondary Label :", c.SecondaryLabel)
-		}
-
-	}
-	return nil
-}
-
-func (gQL graphQL) displayName(id string) error {
-	query := fmt.Sprintf(`{
-		squad(id: %s) {
-		  name
-		}
-	  }
-	  `, id)
-	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
-		return err
-	}
-	fmt.Println(gQL.Data.Squad.Name)
-	return nil
-}
-
 func init() {
 
 	for _, f := range flags {
 		Cmd.Flags().BoolP(f.Name, f.Short, false, f.Description)
 	}
-
 	Cmd.Flags().String("cardEmail", "", "grep cards with for given email (works with card only)")
 	Cmd.Flags().String("cardSL", "", "grep cards with for given SwinLane (works with card only)")
 	Cmd.Flags().String("cardPL", "", "grep cards with for given Primary Label (works with card only)")
+
+	Cmd.PersistentFlags().String("id", "", "squad id")
+	Cmd.AddCommand(usersCmd)
+	Cmd.AddCommand(DescCmd)
+	Cmd.AddCommand(cardsCmd)
+
+	cardsCmd.Flags().String("filterEmail", "", "filter for cards for the email")
+	cardsCmd.Flags().String("filterSLane", "", "filter for cards for the SwinLane")
+	cardsCmd.Flags().String("filterPLabel", "", "filter for cards for the Primary Label")
+
+	now := time.Now()
+	lastMonth := now.AddDate(0, -1, 0)
+	cardsCmd.Flags().String("updatedSince", lastMonth.Format(time.RFC3339), "filter for cards for the Primary Label")
+
+	if err := Cmd.MarkPersistentFlagRequired("id"); err != nil {
+		return
+	}
+	vault.ReadVault()
 }
