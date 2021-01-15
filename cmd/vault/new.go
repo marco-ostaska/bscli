@@ -29,13 +29,14 @@ var newCmd = &cobra.Command{
 	Short: "create new vault.",
 	Long: `create new vault.
 For more information how to create a token please 
-check the API section https://portal.bluesight.io/tutorial.html `,
+check the API section https://portal.bluesight.io/tutorial.html 
+`,
 	SilenceErrors: true,
 	Example: `
   Unix Based OS: (use single quotes)
-      sl1cmd vault new -k '<token>' --url 'https://bluesight.com'
+      bscli vault new -k '<token>' --url 'https://www.bluesight.io/graphql'
   Windows: (use double quotes)
-      sl1cmd vault new -k "<token>" --url "https://bluesight.com"
+      bscli vault new -k "<token>" --url "https://www.bluesight.io/graphql"
 `,
 	RunE: newVault,
 }

@@ -37,6 +37,9 @@ const (
 	APIKey = "Bluesight-API-Token" // default bluesight token key
 )
 
+// ErrLoginFailure message when got an login error
+var ErrLoginFailure error = fmt.Errorf(`invalid character '<' looking for beginning of value`)
+
 // ReadVault reads the user vault contents
 func ReadVault() {
 	if err := Credential.ReadFile(Dir, File); err != nil {
