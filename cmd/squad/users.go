@@ -58,8 +58,13 @@ func displayUsers(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	fmt.Println("Name       :", gQL.Data.Squad.Name)
-	fmt.Println("Description:", gQL.Data.Squad.Description)
+	for _, u := range gQL.Data.Squad.Users {
+		fmt.Printf("- %s (%s)\n", u.Fullname, u.Email)
+	}
 
 	return nil
+}
+
+func init() {
+	Cmd.AddCommand(usersCmd)
 }

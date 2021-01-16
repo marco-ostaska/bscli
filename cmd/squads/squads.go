@@ -56,6 +56,11 @@ func squadsMain(cmd *cobra.Command, args []string) error {
 	  `
 
 	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
+		if err.Error() == vault.ErrLoginFailure.Error() {
+
+			return fmt.Errorf("Login Failure, please check your token and url and try again")
+		}
+
 		return err
 	}
 

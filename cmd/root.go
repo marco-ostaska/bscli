@@ -22,11 +22,11 @@ import (
 	"os"
 
 	"github.com/marco-ostaska/bscli/cmd/card"
-	"github.com/marco-ostaska/bscli/cmd/mood"
 	"github.com/marco-ostaska/bscli/cmd/squad"
 	"github.com/marco-ostaska/bscli/cmd/squads"
 	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
+	"github.com/spf13/cobra/doc"
 )
 
 var version string
@@ -45,7 +45,7 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	//doc.GenMarkdownTree(RootCmd, "./docs")
+	doc.GenMarkdownTree(RootCmd, "./docs")
 }
 
 func init() {
@@ -53,7 +53,6 @@ func init() {
 	RootCmd.AddCommand(vault.Cmd)
 	RootCmd.AddCommand(squads.Cmd)
 	RootCmd.AddCommand(squad.Cmd)
-	RootCmd.AddCommand(mood.Cmd)
 	RootCmd.AddCommand(card.Cmd)
 
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "display this help and exit")

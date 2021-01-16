@@ -19,6 +19,7 @@ package squad
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
@@ -41,15 +42,16 @@ type assignees []struct {
 }
 
 func filter(cmd cobra.Command, asg assignees, pLabel []string, pSlane string) bool {
-	filterEmail, err := cmd.Flags().GetString("FilterEmail")
+
+	filterEmail, err := cmd.Flags().GetString("filterEmail")
 	if err != nil {
 		return false
 	}
-	filterSlane, err := cmd.Flags().GetString("FilterSlane")
+	filterSlane, err := cmd.Flags().GetString("filterSLane")
 	if err != nil {
 		return false
 	}
-	filterPlabel, err := cmd.Flags().GetString("FilterPLabel")
+	filterPlabel, err := cmd.Flags().GetString("filterPLabel")
 	if err != nil {
 		return false
 	}
@@ -155,4 +157,16 @@ func displayCards(cmd *cobra.Command, args []string) error {
 
 	}
 	return nil
+}
+
+func init() {
+
+	// cards commands and routines
+	Cmd.AddCommand(cardsCmd)
+	cardsCmd.Flags().String("filterEmail", "", "filter for cards for the email")
+	cardsCmd.Flags().String("filterSLane", "", "filter for cards for the SwimLane")
+	cardsCmd.Flags().String("filterPLabel", "", "filter for cards for the Primary Label")
+	now := time.Now()
+	lastMonth := now.AddDate(0, -1, 0)
+	cardsCmd.Flags().String("updatedSince", lastMonth.Format(time.RFC3339), "filter for cards for the Primary Label")
 }

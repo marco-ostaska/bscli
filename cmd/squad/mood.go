@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-// Package mood defines the mood marbles command to bew called by cobra
-package mood
+package squad
 
 import (
 	"fmt"
@@ -25,7 +24,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-type graphQL struct {
+type graphQLMood struct {
 	Data struct {
 		Squad struct {
 			Mood struct {
@@ -58,10 +57,9 @@ var flags = []struct {
 	{"comments", "display last mood marbles comments for given squad"},
 }
 
-// Cmd represents the mood.go command
-var Cmd = &cobra.Command{
-	Use:   "mood [id]...",
-	Args:  cobra.ExactArgs(1),
+// moodCmd represents the mood.go command
+var moodCmd = &cobra.Command{
+	Use:   "mood",
 	Short: "display mood marbles information for a given squad",
 	Long: `display mood marbles information for a given squad
 	`,
@@ -70,25 +68,29 @@ var Cmd = &cobra.Command{
 
 func moodMain(cmd *cobra.Command, args []string) error {
 
-	if cmd.Flags().NFlag() < 1 {
+	if cmd.Flags().NFlag() < 2 {
 		return fmt.Errorf("No flag(s) received")
 	}
-	vault.ReadVault()
+
+	id, err := cmd.Flags().GetString("id")
+	if err != nil {
+		return err
+	}
 
 	for _, f := range flags {
 		if cmd.Flag(f.Name).Changed {
-			var gQL graphQL
+			var gQL graphQLMood
 			switch f.Name {
 			case "record":
-				if err := gQL.displayRecords(args[0]); err != nil {
+				if err := gQL.displayRecords(id); err != nil {
 					return err
 				}
 			case "comments":
-				if err := gQL.displayComments(args[0]); err != nil {
+				if err := gQL.displayComments(id); err != nil {
 					return err
 				}
 			case "report":
-				if err := gQL.displayReport(args[0]); err != nil {
+				if err := gQL.displayReport(id); err != nil {
 					return err
 				}
 			}
@@ -99,7 +101,7 @@ func moodMain(cmd *cobra.Command, args []string) error {
 
 }
 
-func (gQL graphQL) displayRecords(id string) error {
+func (gQL graphQLMood) displayRecords(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s){
 		  mood{
@@ -131,7 +133,7 @@ func (gQL graphQL) displayRecords(id string) error {
 	return nil
 }
 
-func (gQL graphQL) displayComments(id string) error {
+func (gQL graphQLMood) displayComments(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s){
 		  mood{
@@ -156,7 +158,7 @@ func (gQL graphQL) displayComments(id string) error {
 	return nil
 }
 
-func (gQL graphQL) displayReport(id string) error {
+func (gQL graphQLMood) displayReport(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s){
 		  mood{
@@ -187,11 +189,6 @@ func (gQL graphQL) displayReport(id string) error {
 		fmt.Printf("%-25s: %v %s\n", m.Date, m.Value, emoji(m.Value))
 	}
 
-	// for _, m := range gQL.Data.Squad.Mood.MoodReport.MonthlyAverages {
-	// 	return
-
-	// }
-
 	return nil
 }
 
@@ -214,9 +211,13 @@ func emoji(score float64) string {
 }
 
 func init() {
+	Cmd.AddCommand(moodCmd)
 
 	for _, f := range flags {
-		Cmd.Flags().Bool(f.Name, false, f.Description)
+		moodCmd.Flags().Bool(f.Name, false, f.Description)
 	}
 
+	if err := Cmd.MarkPersistentFlagRequired("id"); err != nil {
+		return
+	}
 }

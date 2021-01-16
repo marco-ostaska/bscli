@@ -54,7 +54,12 @@ func displayDescription(cmd *cobra.Command, args []string) error {
 	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
 		return err
 	}
-	fmt.Println(gQL.Data.Squad.Description)
+	fmt.Println("Name       :", gQL.Data.Squad.Name)
+	fmt.Println("Description:", gQL.Data.Squad.Description)
 
 	return nil
+}
+
+func init() {
+	Cmd.AddCommand(DescCmd)
 }
