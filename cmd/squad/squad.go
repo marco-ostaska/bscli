@@ -19,7 +19,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 package squad
 
 import (
-	"github.com/marco-ostaska/bscli/cmd/vault"
 	"github.com/spf13/cobra"
 )
 
@@ -69,5 +68,5 @@ var Cmd = &cobra.Command{
 func init() {
 
 	Cmd.PersistentFlags().String("id", "", "squad id")
-	vault.ReadVault()
+	//vault.ReadVault()
 }

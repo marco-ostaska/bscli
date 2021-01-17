@@ -9,5 +9,4 @@ go: "1.15.6"
 
 script: 
   - go test ./cmd/vault/. -v
-  - go run . vault new -k $BS_TOKEN --url $BS_URI
-  - go run . squads
+  - go run . vault new -k ${BS_TOKEN} --url ${BS_URI}
