@@ -31,21 +31,22 @@ var Cmd = &cobra.Command{
 	Long:          `list the squads for the user`,
 	SilenceErrors: true,
 	SilenceUsage:  true,
-	RunE:          squadsMain,
+	RunE:          squadsDisplay,
 }
 
-func squadsMain(cmd *cobra.Command, args []string) error {
+type graphQL struct {
+	Data struct {
+		Squads []struct {
+			ID   string `json:"id"`
+			Name string `json:"name"`
+		} `json:"squads"`
+	} `json:"data"`
+}
+
+func squadsDisplay(cmd *cobra.Command, args []string) error {
 	vault.ReadVault()
 
-	var gQL struct {
-		Data struct {
-			Squads []struct {
-				ID   string `json:"id"`
-				Name string `json:"name"`
-			} `json:"squads"`
-		} `json:"data"`
-	}
-
+	var gQL graphQL
 	query := `{
 		squads {
 		  id
@@ -57,16 +58,12 @@ func squadsMain(cmd *cobra.Command, args []string) error {
 
 	if err := vault.HTTP.QueryGraphQL(query, &gQL); err != nil {
 		if err.Error() == vault.ErrLoginFailure.Error() {
-
 			return fmt.Errorf("Login Failure, please check your token and url and try again")
 		}
-
 		return err
 	}
 
-	squads := gQL.Data.Squads
-
-	for _, v := range squads {
+	for _, v := range gQL.Data.Squads {
 		fmt.Printf("id=%s(%s)\n", v.ID, v.Name)
 	}
 
