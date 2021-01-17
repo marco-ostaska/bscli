@@ -82,15 +82,15 @@ func moodMain(cmd *cobra.Command, args []string) error {
 			var gQL graphQLMood
 			switch f.Name {
 			case "record":
-				if err := gQL.displayRecords(id); err != nil {
+				if err := gQL.displayMoodRecords(id); err != nil {
 					return err
 				}
 			case "comments":
-				if err := gQL.displayComments(id); err != nil {
+				if err := gQL.displayMoodComments(id); err != nil {
 					return err
 				}
 			case "report":
-				if err := gQL.displayReport(id); err != nil {
+				if err := gQL.displayMoodReport(id); err != nil {
 					return err
 				}
 			}
@@ -101,7 +101,7 @@ func moodMain(cmd *cobra.Command, args []string) error {
 
 }
 
-func (gQL graphQLMood) displayRecords(id string) error {
+func (gQL graphQLMood) displayMoodRecords(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s){
 		  mood{
@@ -133,7 +133,7 @@ func (gQL graphQLMood) displayRecords(id string) error {
 	return nil
 }
 
-func (gQL graphQLMood) displayComments(id string) error {
+func (gQL graphQLMood) displayMoodComments(id string) error {
 	query := fmt.Sprintf(`{
 		squad(id: %s){
 		  mood{
@@ -158,7 +158,8 @@ func (gQL graphQLMood) displayComments(id string) error {
 	return nil
 }
 
-func (gQL graphQLMood) displayReport(id string) error {
+func (gQL graphQLMood) displayMoodReport(id string) error {
+	vault.ReadVault()
 	query := fmt.Sprintf(`{
 		squad(id: %s){
 		  mood{

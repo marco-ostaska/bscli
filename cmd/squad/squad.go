@@ -68,5 +68,4 @@ var Cmd = &cobra.Command{
 func init() {
 
 	Cmd.PersistentFlags().String("id", "", "squad id")
-	//vault.ReadVault()
 }

@@ -37,6 +37,7 @@ var usersCmd = &cobra.Command{
 }
 
 func displayUsers(cmd *cobra.Command, args []string) error {
+	vault.ReadVault()
 
 	id, err := cmd.Flags().GetString("id")
 	if err != nil {

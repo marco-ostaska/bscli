@@ -95,6 +95,7 @@ func filter(cmd cobra.Command, asg assignees, pLabel []string, pSlane string) bo
 }
 
 func displayCards(cmd *cobra.Command, args []string) error {
+	vault.ReadVault()
 
 	updatedSince, err := cmd.Flags().GetString("updatedSince")
 	if err != nil {

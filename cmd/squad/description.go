@@ -37,6 +37,7 @@ var DescCmd = &cobra.Command{
 }
 
 func displayDescription(cmd *cobra.Command, args []string) error {
+	vault.ReadVault()
 	id, err := cmd.Flags().GetString("id")
 	if err != nil {
 		return err
