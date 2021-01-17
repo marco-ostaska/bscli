@@ -30,19 +30,19 @@ var usersCmd = &cobra.Command{
 	Use:           "users",
 	Short:         "display the users for the squad",
 	SilenceErrors: true,
-	Example:       `bscli squad --id <squad id> users`,
+	Example:       `bscli squad --id [squad id] users`,
 	Long: `display the users for the squad
 	`,
 	RunE: displayUsers,
 }
 
 func displayUsers(cmd *cobra.Command, args []string) error {
-	vault.ReadVault()
-
 	id, err := cmd.Flags().GetString("id")
 	if err != nil {
 		return err
 	}
+
+	vault.ReadVault()
 
 	var gQL graphQL
 	query := fmt.Sprintf(`{

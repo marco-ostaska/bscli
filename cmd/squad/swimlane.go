@@ -31,14 +31,13 @@ var swimlaneCmd = &cobra.Command{
 	Aliases:       []string{"sl"},
 	Short:         "display the swimlane workstates of given squad",
 	SilenceErrors: true,
-	Example:       `bscli squad --id <squad id> swimlane --filterSL "Default Swimlane" `,
+	Example:       `bscli squad --id [squad id] swimlane --filterSL "Default Swimlane" `,
 	Long: `display the users for the squad
 	`,
 	RunE: displayswimlane,
 }
 
 func printTree(t string, s []string) {
-
 	if len(s) == 0 {
 		return
 	}
@@ -46,9 +45,7 @@ func printTree(t string, s []string) {
 	fmt.Printf("├── %s:\n", t)
 	for i := 0; i < len(s); i++ {
 		fmt.Println("│   └──", s[i])
-
 	}
-
 }
 
 func displayswimlane(cmd *cobra.Command, args []string) error {
@@ -74,7 +71,7 @@ func displayswimlane(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	SwimlaneWorkstatesTotal := len(gQL.Data.Squad.SwimlaneWorkstates)
+	var SwimlaneWorkstatesTotal int
 	var BacklogWorkstatesTotal int
 	var ActiveWorkstatesTotal int
 	var WaitWorkstatesTotal int
@@ -90,19 +87,21 @@ func displayswimlane(cmd *cobra.Command, args []string) error {
 
 	for _, sl := range gQL.Data.Squad.SwimlaneWorkstates {
 
-		if len(filterSL) == 0 || filterSL == sl.Name {
-			fmt.Println(sl.Name)
+		if len(filterSL) > 0 && filterSL != sl.Name {
+			continue
+		}
 
-			if tree {
-				printTree("Backlog WorkStates", sl.BacklogWorkstates)
-				printTree("Active WorkStates", sl.ActiveWorkstates)
-				printTree("Wait WorkStates", sl.WaitWorkstates)
-				fmt.Println()
-				BacklogWorkstatesTotal += len(sl.BacklogWorkstates)
-				ActiveWorkstatesTotal += len(sl.ActiveWorkstates)
-				WaitWorkstatesTotal += len(sl.WaitWorkstates)
-			}
+		fmt.Println(sl.Name)
 
+		if tree {
+			printTree("Backlog WorkStates", sl.BacklogWorkstates)
+			printTree("Active WorkStates", sl.ActiveWorkstates)
+			printTree("Wait WorkStates", sl.WaitWorkstates)
+			fmt.Println()
+			SwimlaneWorkstatesTotal++
+			BacklogWorkstatesTotal = len(sl.BacklogWorkstates)
+			ActiveWorkstatesTotal = len(sl.ActiveWorkstates)
+			WaitWorkstatesTotal = len(sl.WaitWorkstates)
 		}
 
 	}
