@@ -8,8 +8,8 @@ language: go
 go: "1.15.6"
 
 script: 
-  - go test ./cmd/vault/. -v
+  - go test ./cmd/vault/. 
   - go run . vault new -k ${BS_TOKEN} --url ${BS_URI}
-  - go test ./cmd/vault/. -v
-  - go test ./cmd/squads/. -v
-  - go test ./cmd/squad/. -v
+  - go test ./cmd/vault/. 
+  - go test ./cmd/squads/. 
+  - go test ./cmd/squad/. 
