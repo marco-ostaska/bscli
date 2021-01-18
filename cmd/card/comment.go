@@ -141,7 +141,7 @@ func comment(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("card comment created successfull")
+	fmt.Println("card comment created successful")
 	fmt.Println("Identifier :", gQL.Data.CreateComment.Card.Identifier)
 	fmt.Println("created At :", gQL.Data.CreateComment.Comment.CreatedAt)
 	fmt.Println("created By :", gQL.Data.CreateComment.Comment.CreatedBy)

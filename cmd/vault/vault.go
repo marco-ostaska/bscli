@@ -17,7 +17,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 // Package vault is mainly a reference to cobra command vault
 //
-// But it has the essentials to vault adminstration to be used throughout the application.
+// But it has the essentials to vault administration to be used throughout the application.
 package vault
 
 import (

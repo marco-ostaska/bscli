@@ -172,7 +172,7 @@ func update(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("card updated successfull")
+	fmt.Println("card updated successful")
 	fmt.Println("Identifier:", gQL.Data.UpdateCard.Card.Identifier)
 	fmt.Println("Title     :", gQL.Data.UpdateCard.Card.Title)
 

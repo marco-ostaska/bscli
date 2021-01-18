@@ -205,7 +205,7 @@ func create(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	fmt.Println("card created successfull")
+	fmt.Println("card created successful")
 	fmt.Println("Identifier:", gQL.Data.CreateCard.Card.Identifier)
 	fmt.Println("Title     :", gQL.Data.CreateCard.Card.Title)
 
