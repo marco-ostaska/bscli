@@ -28,7 +28,8 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var version string
+// Version represents bscli version
+var version string = "dev"
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{

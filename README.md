@@ -11,6 +11,8 @@ bscli is a command line interface to interact with [bluesight](https://www.blues
 - [Commands](#commands)
 - [Installing](#intalling)
 - [Getting Started](#getting-started)
+- [Limitations](#limitations)
+- [License](#license)
 
 
 # Overview
@@ -43,6 +45,12 @@ Then simply execute the app.
 Before using the bscli to perform admnistrative tasks you must [configure the bscli vault](docs/bscli_vault_new.md)).
 
 For more information how to create a token, [please read this first](https://portal.bluesight.io/tutorial.html) under API section.
+
+# Limitations
+
+- bscli can not overlap bluesight.io api limitations such as adding mood with it.
+- bscli does not provide all functionalities that bluesight.io does, with provide basic functionality for daily uses, even if it is provided by the API.
+- Feel free to raise a [feature request](https://github.com/marco-ostaska/bscli/issues/new?assignees=&labels=&template=feature_request.md&title=) if you believe something is missing and if it is not an API limitation we will be glad to verify the implementation possibility.
 
 # License
 

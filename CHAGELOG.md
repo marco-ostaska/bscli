@@ -1,5 +1,15 @@
 # Changelog
 
+
+## [0.5b] - 2021-01-18
+
+- first "production" ready release
+
+### Fixed
+- minor fixed
+- some errors handing
+- minor refactoring
+
 ## [Unreleased]
 
 ## [0.4.0-command] - 2021-01-15
