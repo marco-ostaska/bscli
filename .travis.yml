@@ -12,3 +12,4 @@ script:
   - go run . vault new -k ${BS_TOKEN} --url ${BS_URI}
   - go test ./cmd/vault/. -v
   - go test ./cmd/squads/. -v
+  - go test ./cmd/squad/. -v
