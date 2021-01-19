@@ -3,7 +3,7 @@
 bscli is a command line interface to interact with [bluesight](https://www.bluesight.io/) kanban.
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/marco-ostaska/bscli)](https://goreportcard.com/report/github.com/marco-ostaska/bscli)
-[![Build Status](https://travis-ci.com/marco-ostaska/bscli.svg?branch=unreleased)](https://travis-ci.com/marco-ostaska/bscli)
+[![Build Status](https://travis-ci.com/marco-ostaska/bscli.svg?branch=main)](https://travis-ci.com/marco-ostaska/bscli)
 
 # Table of Contents
 
