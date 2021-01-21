@@ -36,59 +36,99 @@ var cardsCmd = &cobra.Command{
 	RunE: displayCards,
 }
 
-type assignees []struct {
-	Fullname string `json:"fullname"`
-	Email    string `json:"email"`
+type filters struct {
+	filterEmail struct {
+		value string
+		ok    bool
+	}
+	filterSlane struct {
+		value string
+		ok    bool
+	}
+	filterPlabel struct {
+		value string
+		ok    bool
+	}
+	filterWorkState struct {
+		value string
+		ok    bool
+	}
+	assignees []struct {
+		Fullname string `json:"fullname"`
+		Email    string `json:"email"`
+	}
+	plabel    []string
+	workState string
+	pslane    string
 }
 
-func filter(cmd cobra.Command, asg assignees, pLabel []string, pSlane string) bool {
-
-	filterEmail, err := cmd.Flags().GetString("filterEmail")
-	if err != nil {
-		return false
-	}
-	filterSlane, err := cmd.Flags().GetString("filterSLane")
-	if err != nil {
-		return false
-	}
-	filterPlabel, err := cmd.Flags().GetString("filterPLabel")
-	if err != nil {
-		return false
+func (f *filters) filterLen() {
+	if len(f.filterEmail.value) == 0 {
+		f.filterEmail.ok = true
 	}
 
-	var emailOK bool
-	var slOK bool
-	var plOK bool
+	if len(f.filterPlabel.value) == 0 {
+		f.filterPlabel.ok = true
+	}
 
-	for _, a := range asg {
-		if a.Email == filterEmail {
-			emailOK = true
+	if len(f.filterSlane.value) == 0 {
+		f.filterSlane.ok = true
+	}
+
+	if len(f.filterWorkState.value) == 0 {
+		f.filterWorkState.ok = true
+	}
+
+}
+
+func (f *filters) hasFilterOn(cmd cobra.Command) error {
+	var errs [4]error
+
+	f.filterEmail.value, errs[0] = cmd.Flags().GetString("filterEmail")
+	f.filterSlane.value, errs[1] = cmd.Flags().GetString("filterSLane")
+	f.filterPlabel.value, errs[2] = cmd.Flags().GetString("filterPLabel")
+	f.filterWorkState.value, errs[3] = cmd.Flags().GetString("filterWorkState")
+
+	for _, err := range errs {
+		if err != nil {
+			return err
 		}
 	}
 
-	for _, p := range pLabel {
-		if p == filterPlabel {
-			plOK = true
+	f.filterLen()
+
+	return nil
+
+}
+
+//TODO break this function
+func (f *filters) filter(cmd cobra.Command) bool {
+
+	if err := f.hasFilterOn(cmd); err != nil {
+		return false
+	}
+
+	for _, a := range f.assignees {
+		if a.Email == f.filterEmail.value {
+			f.filterEmail.ok = true
 		}
 	}
 
-	if pSlane == filterSlane {
-		slOK = true
+	for _, p := range f.plabel {
+		if p == f.filterPlabel.value {
+			f.filterPlabel.ok = true
+		}
 	}
 
-	if len(filterEmail) == 0 {
-		emailOK = true
+	if f.workState == f.filterWorkState.value {
+		f.filterWorkState.ok = true
 	}
 
-	if len(filterSlane) == 0 {
-		slOK = true
+	if f.pslane == f.filterSlane.value {
+		f.filterSlane.ok = true
 	}
 
-	if len(filterPlabel) == 0 {
-		plOK = true
-	}
-
-	if !emailOK || !slOK || !plOK {
+	if !f.filterSlane.ok || !f.filterPlabel.ok || !f.filterSlane.ok || !f.filterWorkState.ok {
 		return false
 	}
 	return true
@@ -133,7 +173,13 @@ func displayCards(cmd *cobra.Command, args []string) error {
 
 	for _, c := range gQL.Data.Squad.Cards {
 
-		if !filter(*cmd, c.Assignees, c.PrimaryLabels, c.Swimlane) {
+		var f filters
+		f.plabel = c.PrimaryLabels
+		f.assignees = c.Assignees
+		f.pslane = c.Swimlane
+		f.workState = c.WorkstateType
+
+		if !f.filter(*cmd) {
 			continue
 		}
 
@@ -167,6 +213,7 @@ func init() {
 	cardsCmd.Flags().String("filterEmail", "", "filter for cards for the email")
 	cardsCmd.Flags().String("filterSLane", "", "filter for cards for the SwimLane")
 	cardsCmd.Flags().String("filterPLabel", "", "filter for cards for the Primary Label")
+	cardsCmd.Flags().String("filterWorkState", "", "filter for cards for the WorkState Type")
 	now := time.Now()
 	lastMonth := now.AddDate(0, -1, 0)
 	cardsCmd.Flags().String("updatedSince", lastMonth.Format(time.RFC3339), "filter for cards for the Primary Label")
