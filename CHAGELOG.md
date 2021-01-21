@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6b] - 2021-01-21
+
+## Added
+- filterWorkState to squad cards
+
+## Change
+- some refactor on squad cards filters
+
 
 ## [0.5b] - 2021-01-18
 
