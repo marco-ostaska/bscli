@@ -30,6 +30,18 @@ import (
 
 // Version represents bscli version
 var version string = "dev"
+var versionMsg string = fmt.Sprintf(`bscli %s
+
+Copyright (C) 2021 bscli is released under GNU General Public License v3 
+(GPLv3) <http://www.gnu.org/licenses/>
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+Written By Marco Ostaska
+`, version)
 
 // RootCmd represents the base command when called without any subcommands
 var RootCmd = &cobra.Command{
@@ -58,16 +70,6 @@ func init() {
 	RootCmd.PersistentFlags().BoolP("help", "h", false, "display this help and exit")
 	RootCmd.Flags().BoolP("version", "v", false, "output version information and exit")
 
-	RootCmd.SetVersionTemplate(`{{.Name}} {{.Version}}
+	RootCmd.SetVersionTemplate(versionMsg)
 
-Copyright (C) 2021 bscli is released under GNU General Public License v3 
-(GPLv3) <http://www.gnu.org/licenses/>
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-
-Written By Marco Ostaska
-`)
 }
