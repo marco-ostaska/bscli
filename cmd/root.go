@@ -57,7 +57,8 @@ func Execute() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-	//doc.GenMarkdownTree(RootCmd, "./docs")
+	// RootCmd.DisableAutoGenTag = true
+	// doc.GenMarkdownTree(RootCmd, "./docs")
 }
 
 func init() {
