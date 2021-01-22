@@ -1,13 +1,9 @@
-## bscli squads
+## bscli version
 
-list the squads for the user
-
-### Synopsis
-
-list the squads for the user
+output version information and exit
 
 ```
-bscli squads [flags]
+bscli version [flags]
 ```
 
 ### Options inherited from parent commands
