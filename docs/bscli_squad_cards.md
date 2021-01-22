@@ -25,6 +25,7 @@ bscli squad --id <squad id> cards --filterEmail my@email.com --updatedSince "202
       --filterSLane string       filter for cards for the SwimLane
       --filterWorkState string   filter for cards for the WorkState Type
       --updatedSince string      filter for cards for the Primary Label (default "2020-12-22T13:10:50-03:00")
+
 ```
 
 ### Options inherited from parent commands
