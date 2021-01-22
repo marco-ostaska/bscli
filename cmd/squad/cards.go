@@ -128,7 +128,7 @@ func (f *filters) filter(cmd cobra.Command) bool {
 		f.filterSlane.ok = true
 	}
 
-	if !f.filterSlane.ok || !f.filterPlabel.ok || !f.filterSlane.ok || !f.filterWorkState.ok {
+	if !f.filterEmail.ok || !f.filterPlabel.ok || !f.filterSlane.ok || !f.filterWorkState.ok {
 		return false
 	}
 	return true
