@@ -1,7 +1,11 @@
 # Changelog
 
-## [0.6b] - 2021-01-21
 
+## [0.7b] - 2021-01-22
+## Added
+- card close command
+
+## [0.6b] - 2021-01-21
 ## Added
 - filterWorkState to squad cards
 
